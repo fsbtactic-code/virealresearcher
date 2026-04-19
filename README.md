@@ -103,8 +103,8 @@ Banana Parser — это **десктопное приложение**, кото
 
 ```bash
 # 1. Клонируйте
-git clone https://github.com/banana-marketing/banana-parser.git
-cd banana-parser
+git clone https://github.com/fsbtactic-code/virealresearcher.git
+cd virealresearcher
 
 # 2. Установите зависимости
 pip install -r requirements.txt
@@ -162,6 +162,15 @@ Banana Parser также может работать как **MCP-сервер**
   }
 }
 ```
+
+### Slash-команды (Claude Code)
+
+Если вы открыли проект в Claude Code, доступны команды:
+
+| Команда | Описание |
+|---------|----------|
+| `/banana-install` | Установить все зависимости и проверить готовность |
+| `/banana-launch` | Запустить главное окно парсера |
 
 ---
 
