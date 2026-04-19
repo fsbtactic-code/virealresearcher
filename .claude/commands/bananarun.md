@@ -1,3 +1,6 @@
+---
+description: Запуск парсера (поиск и дашборд)
+---
 Запусти главное окно Banana Parser:
 
 1. Проверь что зависимости установлены: `python -c "import webview, playwright; print('OK')"`
