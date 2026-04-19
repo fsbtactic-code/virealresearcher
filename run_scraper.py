@@ -185,6 +185,15 @@ class WebWorkerApi:
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
 
+                def _progress_cb(stats: dict):
+                    if w:
+                        try:
+                            # Forward stats dict to JavaScript
+                            stats_json = json.dumps(stats, ensure_ascii=False)
+                            w.evaluate_js(f"if(window.updateProgress) window.updateProgress({stats_json});")
+                        except Exception as e:
+                            log.debug(f"Progress update UI error: {e}")
+
                 result = loop.run_until_complete(
                     master_viral_hunter(
                         seed_keyword=settings["seed_keyword"],
@@ -201,6 +210,7 @@ class WebWorkerApi:
                         fetch_carousels=settings.get("fetch_carousels", True),
                         min_posts_target=settings.get("min_posts_target", 10),
                         max_scrolls=settings.get("max_scrolls", 60),
+                        progress_cb=_progress_cb,
                     )
                 )
                 loop.close()

@@ -146,7 +146,7 @@ async def expand_search_keywords(seed_keyword: str) -> list[str]:
     browser = StealthBrowser()
     suggestions: list[str] = []
     try:
-        page = await browser.launch(headless=False)
+        page = await browser.launch(headless=False, hidden=True)
         await safe_goto(page, "https://www.instagram.com/")
         await browser.human_delay(2, 4)
 
@@ -194,6 +194,7 @@ async def expand_search_keywords(seed_keyword: str) -> list[str]:
     except Exception as exc:
         log.error(f"[expand_search_keywords] Error: {exc}")
     finally:
+        await browser.rescue_window()
         await browser.close()
     return suggestions
 
@@ -207,15 +208,16 @@ async def scrape_feed(
     max_posts: int = 40,
     post_filter: Optional[PostFilter] = None,
     scrolls_limit: int = 60,
-    fetch_images: bool = True, fetch_reels: bool = True, fetch_carousels: bool = True
+    fetch_images: bool = True, fetch_reels: bool = True, fetch_carousels: bool = True,
+    progress_cb: Optional[Any] = None
 ) -> list[dict]:
     log.info(f"[scrape_feed] Starting (limit: {time_limit_hours}h)")
     browser = StealthBrowser()
     state = InterceptorState()
     try:
-        page = await browser.launch(headless=False)
+        page = await browser.launch(headless=False, hidden=True)
         page.on("response", lambda r: asyncio.ensure_future(
-            handle_response(r, state, source="feed", fetch_images=fetch_images, fetch_reels=fetch_reels, fetch_carousels=fetch_carousels, post_filter=post_filter)
+            handle_response(r, state, source="feed", fetch_images=fetch_images, fetch_reels=fetch_reels, fetch_carousels=fetch_carousels, post_filter=post_filter, progress_cb=progress_cb)
         ))
         await safe_goto(page, "https://www.instagram.com/")
         await browser.human_delay(3, 5)
@@ -299,6 +301,7 @@ async def scrape_feed(
         log.error(f"[scrape_feed] Error: {exc}")
         _save_progress(state.posts, "feed_error")
     finally:
+        await browser.rescue_window()
         await browser.close()
 
     log.info(f"[scrape_feed] Done — {len(state.posts)} posts, {state.filtered_out} filtered out")
@@ -314,15 +317,16 @@ async def scrape_explore(
     max_posts: int = 80,
     post_filter: Optional[PostFilter] = None,
     scrolls_limit: int = 60,
-    fetch_images: bool = True, fetch_reels: bool = True, fetch_carousels: bool = True
+    fetch_images: bool = True, fetch_reels: bool = True, fetch_carousels: bool = True,
+    progress_cb: Optional[Any] = None
 ) -> list[dict]:
     log.info(f"[scrape_explore] Starting (limit: {time_limit_hours}h)")
     browser = StealthBrowser()
     state = InterceptorState()
     try:
-        page = await browser.launch(headless=False)
+        page = await browser.launch(headless=False, hidden=True)
         page.on("response", lambda r: asyncio.ensure_future(
-            handle_response(r, state, source="explore", fetch_images=fetch_images, fetch_reels=fetch_reels, fetch_carousels=fetch_carousels, post_filter=post_filter)
+            handle_response(r, state, source="explore", fetch_images=fetch_images, fetch_reels=fetch_reels, fetch_carousels=fetch_carousels, post_filter=post_filter, progress_cb=progress_cb)
         ))
         await safe_goto(page, "https://www.instagram.com/explore/")
         await browser.human_delay(3, 5)
@@ -403,6 +407,7 @@ async def scrape_explore(
         log.error(f"[scrape_explore] Error: {exc}")
         _save_progress(state.posts, "explore_error")
     finally:
+        await browser.rescue_window()
         await browser.close()
 
     log.info(f"[scrape_explore] Done — {len(state.posts)} posts, {state.filtered_out} filtered out")
@@ -418,14 +423,15 @@ async def scrape_search(
     time_limit_hours: int = 24,
     max_posts: int = 100,
     post_filter: Optional[PostFilter] = None,
+    progress_cb: Optional[Any] = None
 ) -> list[dict]:
     log.info(f"[scrape_search] Keyword: '{keyword}' (limit: {time_limit_hours}h, max: {max_posts})")
     browser = StealthBrowser()
     state = InterceptorState()
     try:
-        page = await browser.launch(headless=False)
+        page = await browser.launch(headless=False, hidden=True)
         page.on("response", lambda r: asyncio.ensure_future(
-            handle_response(r, state, source=f"search:{keyword}", post_filter=post_filter)
+            handle_response(r, state, source=f"search:{keyword}", post_filter=post_filter, progress_cb=progress_cb)
         ))
         clean_keyword = keyword.lstrip("#").strip()
         # New Global Search URL
@@ -507,6 +513,7 @@ async def scrape_search(
         log.error(f"[scrape_search] Error: {exc}")
         _save_progress(state.posts, f"search_{clean_keyword}_error")
     finally:
+        await browser.rescue_window()
         await browser.close()
 
     log.info(f"[scrape_search] Done — {len(state.posts)} posts for '{keyword}'")
@@ -531,7 +538,8 @@ async def master_viral_hunter(
     fetch_reels: bool = True,
     fetch_carousels: bool = True,
     min_posts_target: int = 10,
-    max_scrolls: int = 60
+    max_scrolls: int = 60,
+    progress_cb: Optional[Any] = None
 ) -> dict[str, Any]:
     """
     Main orchestrator for the viral content hunting pipeline.
@@ -571,7 +579,7 @@ async def master_viral_hunter(
     if do_feed:
         log.info(f"[master] Step 2/4: Scraping home feed (Limit: {feed_limit})...")
         try:
-            feed_posts = await scrape_feed(time_limit_hours, max_posts=feed_limit, post_filter=post_filter, scrolls_limit=max_scrolls, fetch_images=fetch_images, fetch_reels=fetch_reels, fetch_carousels=fetch_carousels)
+            feed_posts = await scrape_feed(time_limit_hours, max_posts=feed_limit, post_filter=post_filter, scrolls_limit=max_scrolls, fetch_images=fetch_images, fetch_reels=fetch_reels, fetch_carousels=fetch_carousels, progress_cb=progress_cb)
             log.info(f"[master] Feed returned {len(feed_posts)} posts")
             all_posts.extend(feed_posts)
         except Exception as exc:
@@ -583,7 +591,7 @@ async def master_viral_hunter(
     if do_explore:
         log.info(f"[master] Step 3/4: Scraping explore (Limit: {explore_limit})...")
         try:
-            explore_posts = await scrape_explore(time_limit_hours, max_posts=explore_limit, post_filter=post_filter, scrolls_limit=max_scrolls, fetch_images=fetch_images, fetch_reels=fetch_reels, fetch_carousels=fetch_carousels)
+            explore_posts = await scrape_explore(time_limit_hours, max_posts=explore_limit, post_filter=post_filter, scrolls_limit=max_scrolls, fetch_images=fetch_images, fetch_reels=fetch_reels, fetch_carousels=fetch_carousels, progress_cb=progress_cb)
             log.info(f"[master] Explore returned {len(explore_posts)} posts")
             all_posts.extend(explore_posts)
         except Exception as exc:
@@ -597,7 +605,7 @@ async def master_viral_hunter(
         # Visit multiple related targets (up to 5 to avoid block)
         for kw in keywords[:5]:
             try:
-                all_posts.extend(await scrape_search(kw, time_limit_hours, max_posts=50, post_filter=post_filter))
+                all_posts.extend(await scrape_search(kw, time_limit_hours, max_posts=50, post_filter=post_filter, progress_cb=progress_cb))
             except Exception as exc:
                 log.error(f"[master] Search '{kw}' failed: {exc}")
             await asyncio.sleep(random.uniform(3, 7))
@@ -605,7 +613,7 @@ async def master_viral_hunter(
         # Safe mode: Iterate exactly over the provided keywords
         for kw in keywords:
             try:
-                all_posts.extend(await scrape_search(kw, time_limit_hours, max_posts=50, post_filter=post_filter))
+                all_posts.extend(await scrape_search(kw, time_limit_hours, max_posts=50, post_filter=post_filter, progress_cb=progress_cb))
             except Exception as exc:
                 log.error(f"[master] Search '{kw}' failed: {exc}")
             await asyncio.sleep(random.uniform(3, 7))

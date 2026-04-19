@@ -470,55 +470,119 @@
 <script>
   // ── Embedded Dashboard ──────────────────────────────────────────
 
+  window.updateProgress = function(stats) {
+    if (document.getElementById('statCollected')) {
+      document.getElementById('statCollected').innerText = stats.collected || 0;
+      document.getElementById('statReels').innerText = stats.reels || 0;
+      document.getElementById('statCarou').innerText = stats.carousels || 0;
+      document.getElementById('statPhoto').innerText = stats.photos || 0;
+      document.getElementById('statFiltered').innerText = stats.filtered || 0;
+    }
+  };
+
   window.showBeautifulLoader = function() {
     const scrollArea = document.querySelector('.scroll-area');
     scrollArea.innerHTML = `
       <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:0;">
 
-        <div style="position:relative;width:120px;height:120px;margin-bottom:30px;">
-          <div style="position:absolute;inset:0;border:2px solid rgba(255,255,255,0.05);border-radius:50%;"></div>
-          <div style="position:absolute;inset:0;border:2px transparent solid;border-top-color:#0A84FF;border-right-color:#c026d3;border-radius:50%;opacity:0.8;animation:spin 1.5s cubic-bezier(0.68,-0.55,0.265,1.55) infinite;"></div>
-          <div style="position:absolute;inset:15px;border:2px dashed rgba(255,255,255,0.1);border-radius:50%;animation:spin-reverse 4s linear infinite;"></div>
-          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;">
-            <svg viewBox="0 0 24 24" style="width:32px;height:32px;stroke:#fff;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        <!-- Liquid Sphere / Radar Animation -->
+        <div class="radar-container">
+          <div class="radar-ring r1"></div>
+          <div class="radar-ring r2"></div>
+          <div class="radar-ring r3"></div>
+          <div class="radar-core"><span>🍌</span></div>
+        </div>
+
+        <h2 style="font-size:1.8rem;font-weight:600;margin-bottom:8px;background:linear-gradient(90deg, #fff, rgba(255,255,255,0.5));-webkit-background-clip:text;color:transparent;">Сканируем Instagram...</h2>
+        <p style="color:rgba(255,255,255,0.4);font-size:0.95rem;margin-bottom:40px;">Stealth Mode активен. Браузер скрыт.</p>
+
+        <!-- Stats Grid -->
+        <div class="live-stats-grid">
+          <div class="ls-card main">
+             <div class="ls-glow"></div>
+             <div class="ls-title">Всего собрано</div>
+             <div class="ls-val" id="statCollected">0</div>
           </div>
+          <div class="ls-sub">
+             <div class="ls-card">
+               <div class="ls-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px;"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg> Reels</div>
+               <div class="ls-val" id="statReels">0</div>
+             </div>
+             <div class="ls-card">
+               <div class="ls-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Карусель</div>
+               <div class="ls-val" id="statCarou">0</div>
+             </div>
+             <div class="ls-card">
+               <div class="ls-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg> Фото</div>
+               <div class="ls-val" id="statPhoto">0</div>
+             </div>
+          </div>
+          <div style="color:rgba(255,255,255,0.2); font-size:0.75rem; margin-top:8px;">Отфильтровано (старые/не подходят): <strong id="statFiltered">0</strong></div>
         </div>
 
-        <h2 style="font-size:1.5rem;font-weight:500;margin-bottom:8px;letter-spacing:-0.02em;">Сбор данных...</h2>
-        <p style="color:rgba(255,255,255,0.4);font-size:0.9rem;margin-bottom:28px;">Stealth Browser обходит алгоритмы IG</p>
-
-        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:100px;padding:10px 24px;display:inline-flex;align-items:center;gap:12px;margin-bottom:32px;">
-          <div class="status-dot"></div>
-          <span style="font-family:'JetBrains Mono',monospace;font-size:1.1rem;color:#fff;">Собрано: <span id="collectedCounter" style="font-weight:600;color:#34C759;">0</span></span>
-        </div>
-
-        <button onclick="requestStop()" style="background:none;border:1px solid rgba(255,255,255,0.12);border-radius:100px;color:rgba(255,255,255,0.3);font-size:0.78rem;padding:6px 18px;cursor:pointer;transition:all 0.2s;letter-spacing:0.02em;" onmouseover="this.style.color='rgba(255,69,58,0.8)';this.style.borderColor='rgba(255,69,58,0.3)';" onmouseout="this.style.color='rgba(255,255,255,0.3)';this.style.borderColor='rgba(255,255,255,0.12)';">
-          Остановить с текущим результатом
+        <!-- Stop Button -->
+        <button onclick="requestStop()" class="stop-btn">
+          <span>Остановить и показать</span>
         </button>
       </div>
 
       <style>
-        @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
-        @keyframes spin-reverse { 0%{transform:rotate(360deg)} 100%{transform:rotate(0deg)} }
+        .radar-container {
+           position: relative; width: 140px; height: 140px; margin-bottom: 40px;
+           perspective: 800px; transform-style: preserve-3d;
+        }
+        .radar-ring {
+           position: absolute; inset: 0; border-radius: 50%;
+           border: 2px solid transparent; border-top-color: var(--blue);
+           animation: radarSpin 3s linear infinite;
+           box-shadow: 0 0 20px rgba(10,132,255,0.1), inset 0 0 20px rgba(10,132,255,0.1);
+        }
+        .radar-ring.r1 { border-right-color: var(--orange); animation-duration: 2.5s; inset: 10px; }
+        .radar-ring.r2 { border-bottom-color: var(--green); animation-duration: 4s; animation-direction: reverse; inset: 20px; }
+        .radar-ring.r3 { border-left-color: var(--red); animation-duration: 5s; inset: 30px; }
+        
+        .radar-core {
+           position: absolute; inset: 40px; background: rgba(255,255,255,0.05);
+           border-radius: 50%; display: flex; align-items: center; justify-content: center;
+           box-shadow: inset 0 2px 10px rgba(255,255,255,0.1); backdrop-filter: blur(5px);
+           animation: pulseCore 2s ease-in-out infinite;
+           font-size: 24px;
+        }
+
+        @keyframes radarSpin { 100% { transform: rotate(360deg); } }
+        @keyframes pulseCore { 0%,100% { transform: scale(0.9); box-shadow: 0 0 10px rgba(10,132,255,0.2); } 50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(10,132,255,0.6); } }
+
+        .live-stats-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; width: 380px; }
+        .ls-card {
+           background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+           border-radius: 16px; padding: 12px 16px; position: relative; overflow: hidden;
+           display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .ls-card.main { padding: 18px 20px; background: rgba(52,199,89,0.05); border-color: rgba(52,199,89,0.15); box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .ls-glow { position: absolute; inset:0; background: radial-gradient(circle at 50% 0%, rgba(52,199,89,0.15), transparent 70%); }
+        .ls-title { position:relative; font-size: 0.75rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 4px; }
+        .ls-val { position:relative; font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 700; color: #fff; }
+        .ls-card.main .ls-val { font-size: 2.5rem; color: #34C759; text-shadow: 0 0 15px rgba(52,199,89,0.4); }
+        .ls-sub { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .ls-sub .ls-val { font-size: 1.1rem; }
+
+        .stop-btn {
+           background: transparent; border: 1px solid rgba(255,69,58,0.3); color: rgba(255,69,58,0.9);
+           padding: 12px 28px; border-radius: 100px; font-size: 0.85rem; font-weight: 600;
+           cursor: pointer; position: relative; overflow: hidden; transition: all 0.3s;
+        }
+        .stop-btn:hover { background: rgba(255,69,58,0.1); border-color: rgba(255,69,58,0.6); color: #ff453a; box-shadow: 0 0 15px rgba(255,69,58,0.2); }
       </style>
     `;
-
-    let cnt = 0;
-    window.fakeCounterInterval = setInterval(() => {
-      cnt += Math.floor(Math.random() * 3);
-      const span = document.getElementById('collectedCounter');
-      if (span) span.innerText = cnt;
-    }, 1500);
   };
 
   function requestStop() {
     if (window.pywebview) window.pywebview.api.stopScraping();
-    const btn = document.querySelector('[onclick="requestStop()"]');
-    if (btn) { btn.textContent = '⏳ Останавливаем...'; btn.disabled = true; }
+    const btn = document.querySelector('.stop-btn');
+    if (btn) { btn.innerHTML = '<span>⏳ Останавливаем...</span>'; btn.disabled = true; }
   }
 
   window.finishLoading = function(actualCount, postsJsonStr) {
-    clearInterval(window.fakeCounterInterval);
     let posts = [];
     try { posts = JSON.parse(postsJsonStr || '[]'); } catch(e) {}
 
@@ -530,6 +594,16 @@
   // ── Dashboard builder ───────────────────────────────────────────
 
   function buildDashboard(count, posts) {
+    const ICONS = {
+      reel: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>`,
+      carousel: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
+      photo: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>`,
+      heart: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#ff453a;vertical-align:-2px;margin-right:4px;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`,
+      play: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#0A84FF;vertical-align:-2px;margin-right:4px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`,
+      zap: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#34C759;vertical-align:-2px;margin-right:4px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
+      message: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#BF5AF2;vertical-align:-2px;margin-right:4px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`
+    };
+
     const hotPosts = [...posts]
       .sort((a,b) => (b.velocity_score||0) - (a.velocity_score||0))
       .slice(0, 8);
@@ -541,7 +615,7 @@
       const views  = p.views ? fmtN(p.views) : null;
       const score  = Math.round(p.velocity_score || 0);
       const url    = p.url || '#';
-      const badge  = type === 'reel' ? '🎬' : type === 'carousel' ? '🖼️' : '📷';
+      const badge  = type === 'reel' ? ICONS.reel : type === 'carousel' ? ICONS.carousel : ICONS.photo;
       const hoursAgo = p.hours_ago ? Math.round(p.hours_ago) + 'ч назад' : '';
       const caption = (p.caption_text || '').substring(0,80);
       const rankColor = i === 0 ? '#FFD60A' : i < 3 ? '#FF9F0A' : '#fff';
@@ -552,9 +626,9 @@
           <div class="hot-user">${user}</div>
           <div class="hot-caption">${caption || '—'}</div>
           <div class="hot-stats">
-            <span>❤️ ${likes}</span>
-            ${views ? `<span>▶️ ${views}</span>` : ''}
-            <span style="color:#34C759;font-weight:600;">⚡ ${score}</span>
+            <span style="display:inline-flex;align-items:center;">${ICONS.heart} ${likes}</span>
+            ${views ? `<span style="display:inline-flex;align-items:center;">${ICONS.play} ${views}</span>` : ''}
+            <span style="color:#34C759;font-weight:600;display:inline-flex;align-items:center;">${ICONS.zap} ${score}</span>
             ${hoursAgo ? `<span style="color:rgba(255,255,255,0.4);">${hoursAgo}</span>` : ''}
           </div>
         </a>`;
@@ -562,7 +636,7 @@
 
     const tableRows = posts.map((p, i) => {
       const type  = p.post_type || 'post';
-      const badge = type === 'reel' ? '🎬' : type === 'carousel' ? '🖼️' : '📷';
+      const badge = type === 'reel' ? ICONS.reel : type === 'carousel' ? ICONS.carousel : ICONS.photo;
       const user  = p.owner_username ? `<a href="https://instagram.com/${p.owner_username}" target="_blank" style="color:var(--blue);text-decoration:none;">@${p.owner_username}</a>` : '—';
       const url   = p.url || '#';
       const link  = url !== '#' ? `<a href="${url}" target="_blank" style="color:var(--blue);text-decoration:none;font-size:0.75rem;">открыть ↗</a>` : '';
@@ -611,9 +685,9 @@
         <div class="dash-section-title" style="margin-top:32px;">📊 Все посты</div>
         <div class="filter-bar">
           <button class="f-pill active" data-f="all" onclick="filterDash('all',this)">Все</button>
-          <button class="f-pill" data-f="reel" onclick="filterDash('reel',this)">🎬 Reels</button>
-          <button class="f-pill" data-f="carousel" onclick="filterDash('carousel',this)">🖼️ Carousels</button>
-          <button class="f-pill" data-f="image" onclick="filterDash('image',this)">📷 Images</button>
+          <button class="f-pill" data-f="reel" onclick="filterDash('reel',this)">${ICONS.reel} Reels</button>
+          <button class="f-pill" data-f="carousel" onclick="filterDash('carousel',this)">${ICONS.carousel} Carousels</button>
+          <button class="f-pill" data-f="image" onclick="filterDash('image',this)">${ICONS.photo} Images</button>
         </div>
 
         <!-- Table -->
@@ -623,10 +697,10 @@
               <tr>
                 <th>Тип</th>
                 <th>Автор</th>
-                <th onclick="sortDash(2)" style="cursor:pointer;">❤️ Лайки ↕</th>
-                <th onclick="sortDash(3)" style="cursor:pointer;">💬 Ком. ↕</th>
-                <th onclick="sortDash(4)" style="cursor:pointer;">▶️ Просм. ↕</th>
-                <th onclick="sortDash(5)" style="cursor:pointer;">⚡ Индекс ↕</th>
+                <th onclick="sortDash(2)" style="cursor:pointer;white-space:nowrap;">${ICONS.heart} Лайки ↕</th>
+                <th onclick="sortDash(3)" style="cursor:pointer;white-space:nowrap;">${ICONS.message} Ком. ↕</th>
+                <th onclick="sortDash(4)" style="cursor:pointer;white-space:nowrap;">${ICONS.play} Просм. ↕</th>
+                <th onclick="sortDash(5)" style="cursor:pointer;white-space:nowrap;">${ICONS.zap} Индекс ↕</th>
                 <th>⏱ Возраст</th>
                 <th>Текст публикации</th>
               </tr>

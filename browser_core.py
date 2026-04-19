@@ -63,7 +63,7 @@ class StealthBrowser:
 
     # ── lifecycle ────────────────────────────────────
 
-    async def launch(self, headless: bool = True) -> Page:
+    async def launch(self, headless: bool = True, hidden: bool = False) -> Page:
         """Launch browser, apply stealth, block media, return page."""
         self._pw = await async_playwright().start()
 
@@ -71,13 +71,17 @@ class StealthBrowser:
         if not storage_exists:
             log.warning("storage_state.json not found — run auth.py first!")
 
+        args = [
+            "--disable-blink-features=AutomationControlled",
+            "--disable-dev-shm-usage",
+            "--no-sandbox",
+        ]
+        if hidden and not headless:
+            args.append("--window-position=-32000,-32000")
+
         browser = await self._pw.chromium.launch(
             headless=headless,
-            args=[
-                "--disable-blink-features=AutomationControlled",
-                "--disable-dev-shm-usage",
-                "--no-sandbox",
-            ],
+            args=args,
         )
 
         ctx_kwargs: dict = {
@@ -107,6 +111,33 @@ class StealthBrowser:
 
         log.info(f"Browser launched (headless={headless})")
         return self._page
+
+    async def rescue_window(self):
+        """Returns the window position back to viewable area with micro-size as requested."""
+        if not getattr(self, "_context", None) or not getattr(self, "_page", None):
+            return
+            
+        try:
+            session = await self._context.new_cdp_session(self._page)
+            target_info = await session.send("Target.getTargetInfo")
+            res = await session.send("Browser.getWindowForTarget", {"targetId": target_info["targetInfo"]["targetId"]})
+            window_id = res["windowId"]
+            
+            await session.send("Browser.setWindowBounds", {
+                "windowId": window_id,
+                "bounds": {
+                    "left": 40,
+                    "top": 40,
+                    "width": 300,
+                    "height": 300,
+                    "windowState": "normal"
+                }
+            })
+            # Small delay so user visually sees the window return just before closing
+            import asyncio
+            await asyncio.sleep(1)
+        except Exception as e:
+            log.debug(f"Failed to rescue window: {e}")
 
     async def close(self) -> None:
         """Tear down browser + playwright."""

@@ -91,6 +91,9 @@ class InterceptorState:
     error_count: int = 0
     oldest_timestamp: int = 0
     filtered_out: int = 0
+    reels_count: int = 0
+    carousels_count: int = 0
+    photos_count: int = 0
 
     def add_post(self, post: PostData, post_filter: Optional[PostFilter] = None) -> bool:
         """Add a post if not already seen and passes filters."""
@@ -101,6 +104,12 @@ class InterceptorState:
             return False
         self.seen_ids.add(post.post_id)
         self.posts.append(post)
+        if post.is_reel:
+            self.reels_count += 1
+        elif post.is_carousel:
+            self.carousels_count += 1
+        else:
+            self.photos_count += 1
         if post.timestamp > 0:
             if self.oldest_timestamp == 0:
                 self.oldest_timestamp = post.timestamp
@@ -288,6 +297,7 @@ async def handle_response(
     fetch_reels: bool = True,
     fetch_carousels: bool = True,
     post_filter: Optional[PostFilter] = None,
+    progress_cb: Optional[Any] = None,
 ) -> None:
     """Callback for page.on('response'). Parses JSON and extracts posts."""
     url = response.url
@@ -321,3 +331,14 @@ async def handle_response(
 
     if added > 0 or len(nodes) > 0:
         log.info(f"[{source}] Found {len(nodes)} posts -> Added {added} (Total collected: {len(state.posts)}, Filtered out: {state.filtered_out}) from api endpoint")
+        if progress_cb:
+            try:
+                progress_cb({
+                    "collected": len(state.posts),
+                    "filtered": state.filtered_out,
+                    "reels": state.reels_count,
+                    "carousels": state.carousels_count,
+                    "photos": state.photos_count
+                })
+            except Exception as e:
+                log.debug(f"progress_cb error: {e}")
