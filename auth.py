@@ -145,18 +145,8 @@ async def run_auth():
         print(YELLOW("     Она будет перезаписана при новом входе."))
     print()
 
-    # Ask for confirmation (support auto-confirm for automation)
-    if os.environ.get("AUTO_CONFIRM") == "1":
-        print(GREEN("  ⚡ Авто-подтверждение запасного аккаунта."))
-        confirm = "да"
-    else:
-        confirm = input(BOLD("  Вы используете ЗАПАСНОЙ аккаунт? (да/нет): ")).strip().lower()
-
-    if confirm not in ("да", "yes", "y", "д"):
-        print()
-        print(RED("  ❌ Отменено. Создайте отдельный аккаунт и попробуйте снова."))
-        print()
-        return False
+    # Пропускаем ручное подтверждение (Claude сам предупредит в чате)
+    print(GREEN("  ⚡ Окно авторизации открывается, пожалуйста подождите..."))
 
     print()
     print_instructions()
