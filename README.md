@@ -16,14 +16,15 @@
 
 ```text
 Установи и настрой Banana Parser:
-1. git clone https://github.com/fsbtactic-code/virealresearcher.git (если папка уже есть — зайди в неё и сделай `git pull` для обновления файлов).
-2. cd virealresearcher
-3. Найди глобальный файл конфигурации Claude (`~/.claude.json` или `%APPDATA%\Claude\claude_desktop_config.json`) и автоматически пропиши туда наш MCP-сервер (command: python, args: [АБСОЛЮТНЫЙ_ПУТЬ_ДО_mcp_server.py], cwd: текущая абсолютная папка).
-4. python install_all.py (если будут ошибки — проанализируй и исправь).
-5. Попроси меня запустить `/bananaauth` чтобы открыть окно для входа в Instagram.
-6. Когда я скажу, что авторизовался (и окно само закроется), попроси меня запустить парсер через `/bananarun`.
+1. git clone https://github.com/fsbtactic-code/virealresearcher.git (если папка уже есть — зайди в неё и сделай `git pull` для обновления).
+2. Скопируй все скиллы из скачанной папки `virealresearcher/.claude/skills/` в папку `.claude/skills/` ТЕКУЩЕГО ПРОЕКТА (откуда ты вызван).
+3. Обнови `settings.json` текущего проекта: явно включи скопированные скиллы в `skillOverrides` и дай разрешения на выполнение `Bash(*)`.
+4. Найди глобальный файл конфигурации Claude (`~/.claude.json` или `%APPDATA%\Claude\claude_desktop_config.json`) и автоматически пропиши туда наш MCP-сервер `banana-parser` с АБСОЛЮТНЫМ ПУТЕМ к `virealresearcher/mcp_server.py`.
+5. Перейди в скачанную папку `virealresearcher` и выполни `python install_all.py` (если будут ошибки — проанализируй и исправь).
+6. Попроси меня запустить `/bananaauth` чтобы открыть окно для входа в Instagram.
+7. Когда я скажу, что авторизовался (и окно само закроется), попроси меня запустить парсер через `/bananarun`.
 
-При любых непонятных ошибках проекта читай файл `.ai-context.md`.
+При любых непонятных ошибках проекта читай файл `virealresearcher/.ai-context.md`.
 ```
 
 **Всё.** AI-агент сам установит зависимости, откроет окно для защищенного входа в Instagram и запустит интерфейс.
@@ -35,9 +36,9 @@
 
 ```text
 Обнови Banana Parser:
-1. Зайди в папку `virealresearcher`
-2. Сделай `git pull`
-3. Если есть изменения, при необходимости прогони `python install_all.py`
+1. Зайди в скачанную папку `virealresearcher` и сделай `git pull`.
+2. Скопируй (с перезаписью) все скиллы из `virealresearcher/.claude/skills/` в папку `.claude/skills/` ТЕКУЩЕГО ПРОЕКТА (откуда ты вызван). Обнови `settings.json` чтобы точно включить их.
+3. Если есть изменения, при необходимости прогони `python install_all.py` внутри папки `virealresearcher`.
 4. Скажи мне, что обновление завершено, и попроси запустить `/bananarun`
 ```
 
