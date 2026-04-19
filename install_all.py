@@ -167,6 +167,14 @@ def main():
 
     create_output_dir()
 
+    # Save absolute path to home directory for global access
+    try:
+        home_path_file = Path.home() / ".banana_parser_path"
+        home_path_file.write_text(str(PROJECT_ROOT), encoding="utf-8")
+        log_ok(f"Путь к проекту зафиксирован: {home_path_file}")
+    except Exception as e:
+        log_warn(f"Не удалось сохранить глобальный путь проекта: {e}")
+
     print(f"\n{'='*56}")
     print(f"  {GREEN}{BOLD}✓ Всё установлено!{RESET}")
     print()
