@@ -18,7 +18,7 @@
 Установи и настрой Banana Parser:
 1. git clone https://github.com/fsbtactic-code/virealresearcher.git (если папка уже есть — зайди в неё и сделай `git pull` для обновления файлов).
 2. cd virealresearcher
-3. Найди глобальный файл конфигурации Claude (`~/.claude.json` или `%APPDATA%\Claude\claude_desktop_config.json`) и автоматически пропиши туда наш MCP-сервер (command: python, args: [mcp_server.py], cwd: текущая абсолютная папка).
+3. Найди глобальный файл конфигурации Claude (`~/.claude.json` или `%APPDATA%\Claude\claude_desktop_config.json`) и автоматически пропиши туда наш MCP-сервер (command: python, args: [АБСОЛЮТНЫЙ_ПУТЬ_ДО_mcp_server.py], cwd: текущая абсолютная папка).
 4. python install_all.py (если будут ошибки — проанализируй и исправь).
 5. ОБЯЗАТЕЛЬНО запуси окно авторизации с помощью команды: `cmd /c start python auth.py` (Windows) или `osascript -e 'tell app "Terminal" to do script "python auth.py"'` (Mac). НЕ ПРОСИ меня запускать это вручную! Окно должно открыться само.
 6. Когда я скажу, что авторизовался, запусти `/bananarun` (наша новая команда).
@@ -154,13 +154,13 @@ Banana Parser также может работать как **MCP-сервер**
   "mcpServers": {
     "banana-parser": {
       "command": "python",
-      "args": ["mcp_server.py"],
+      "args": ["C:/АБСОЛЮТНЫЙ/ПУТЬ/К/ПАПКЕ/virealresearcher/mcp_server.py"],
       "cwd": "C:/АБСОЛЮТНЫЙ/ПУТЬ/К/ПАПКЕ/virealresearcher"
     }
   }
 }
 ```
-*Внимание: путь в `cwd` обязательно должен быть абсолютным к папке проекта.*
+*Внимание: путь в `args` должен обязательно включать полный абсолютный путь к файлу mcp_server.py, иначе Claude может искать файл в системных папках!*
 
 ### Slash-команды (Claude Code)
 
