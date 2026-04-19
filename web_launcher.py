@@ -58,7 +58,11 @@ def launch_gui(api_instance) -> None:
 
     log.info("🚀 webview.start() — запуск event loop (блокирующий вызов)...")
     try:
-        webview.start(gui='edgechromium', debug=False)
+        import sys
+        if sys.platform == "win32":
+            webview.start(gui='edgechromium', debug=False)
+        else:
+            webview.start(debug=False)
         log.info("✅ webview.start() завершён (окно закрыто)")
     except Exception as e:
         log.error(f"❌ Ошибка webview.start(): {e}")
