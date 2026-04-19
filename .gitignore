@@ -1,0 +1,34 @@
+# Dependencies
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+
+# Secrets & session data
+storage_state.json
+
+# Output & logs
+output/
+*.log
+
+# AI context (local only, NOT for GitHub)
+.ai-context.md
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Debug artifacts
+dom.html
