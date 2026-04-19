@@ -248,6 +248,13 @@
 </head>
 <body>
 
+<!-- NATIVE PRELOADER (masks webview initialization) -->
+<div id="native-preloader" style="position: fixed; inset: 0; background: #08080a; z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.4s ease;">
+  <div style="width: 44px; height: 44px; border: 3px solid rgba(255,255,255,0.05); border-top-color: #ff2e93; border-bottom-color: #ff8a00; border-radius: 50%; animation: spinNode 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; box-shadow: 0 0 30px rgba(255,46,147,0.2);"></div>
+  <div style="margin-top: 20px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.4); text-transform: uppercase;">Инициализация систем...</div>
+  <style>@keyframes spinNode { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+</div>
+
 <div class="app-container">
 
   <div class="liquid-scene">
@@ -455,6 +462,12 @@
 
   // Auth Status check
   window.addEventListener('pywebviewready', function() {
+    // Hide native preloader smoothly
+    setTimeout(() => {
+      const p = document.getElementById('native-preloader');
+      if (p) { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 400); }
+    }, 200);
+
     window.pywebview.api.getAuthStatus().then(status => {
       const box = document.getElementById('authStatusBox');
       if (status) {
