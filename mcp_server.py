@@ -150,6 +150,14 @@ async def list_tools() -> list[Tool]:
             ),
             inputSchema=LaunchGuiParams.model_json_schema(),
         ),
+        Tool(
+            name="launch_auth_window",
+            description=(
+                "🔑 Открывает окно авторизации Instagram Playwright для ручного входа. "
+                "Использовать, если storage_state.json отсутствует или сессия истекла."
+            ),
+            inputSchema=LaunchGuiParams.model_json_schema(),
+        ),
     ]
 
 
@@ -223,17 +231,36 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
 
         elif name == "launch_gui":
             import subprocess
-            log.info("Launching GUI window...")
-            proc = subprocess.Popen(
-                [sys.executable, str(PROJECT_ROOT / "run_scraper.py")],
-                cwd=str(PROJECT_ROOT),
-            )
+            import sys
+            import platform
+
+            # Open standard parser window
+            cmd_prefix = ["cmd", "/c", "start"] if platform.system() == "Windows" else ["osascript", "-e", 'tell app "Terminal" to do script "python run_scraper.py"']
+            if platform.system() == "Windows":
+                subprocess.Popen(cmd_prefix + [sys.executable, "run_scraper.py"])
+            else:
+                subprocess.Popen(cmd_prefix)
+
             return [TextContent(
                 type="text",
-                text=json.dumps({
-                    "status": "ok",
-                    "message": "🖥️ Окно Banana Parser запущено (PID: " + str(proc.pid) + ")",
-                }, ensure_ascii=False),
+                text="Графическое окно парсера успешно запущено в отдельном процессе.",
+            )]
+            
+        elif name == "launch_auth_window":
+            import subprocess
+            import sys
+            import platform
+
+            # Open authentication window
+            cmd_prefix = ["cmd", "/c", "start"] if platform.system() == "Windows" else ["osascript", "-e", 'tell app "Terminal" to do script "python auth.py"']
+            if platform.system() == "Windows":
+                subprocess.Popen(cmd_prefix + [sys.executable, "auth.py"])
+            else:
+                subprocess.Popen(cmd_prefix)
+
+            return [TextContent(
+                type="text",
+                text="Окно авторизации Instagram успешно запущено. Подождите пока пользователь залогинится.",
             )]
 
         else:
