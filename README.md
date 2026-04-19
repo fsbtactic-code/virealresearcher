@@ -16,8 +16,8 @@
 
 ```
 Установи и запусти Banana Parser:
-1. git clone https://github.com/banana-marketing/banana-parser.git
-2. cd banana-parser
+1. git clone https://github.com/fsbtactic-code/virealresearcher.git
+2. cd virealresearcher
 3. python install_all.py
 4. Если есть ошибки — исправь их автоматически
 5. python auth.py (дождись авторизации в браузере)
