@@ -510,12 +510,12 @@
     scrollArea.innerHTML = `
       <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:0;">
 
-        <!-- Liquid Sphere / Radar Animation -->
-        <div class="radar-container">
-          <div class="radar-ring r1"></div>
-          <div class="radar-ring r2"></div>
-          <div class="radar-ring r3"></div>
-          <div class="radar-core"><span>🍌</span></div>
+        <!-- Liquid Orb Blur Animation -->
+        <div class="liquid-orb">
+          <div class="orb-layer glow"></div>
+          <div class="orb-layer color1"></div>
+          <div class="orb-layer color2"></div>
+          <div class="orb-content">🍌</div>
         </div>
 
         <h2 style="font-size:1.8rem;font-weight:600;margin-bottom:8px;background:linear-gradient(90deg, #fff, rgba(255,255,255,0.5));-webkit-background-clip:text;color:transparent;">Сканируем Instagram...</h2>
@@ -552,33 +552,41 @@
             <span>Остановить и показать</span>
           </button>
         </div>
+
+        <div style="margin-top:16px;">
+          <a href="https://pay.cloudtips.ru/p/ec9faa73" target="_blank" class="btn-donate" style="transform:scale(0.85); transform-origin:center top;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:2px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> 
+            Поддержать проект
+          </a>
+        </div>
       </div>
 
       <style>
-        .radar-container {
-           position: relative; width: 140px; height: 140px; margin-bottom: 40px;
-           perspective: 800px; transform-style: preserve-3d;
+        .liquid-orb {
+           position: relative; width: 90px; height: 90px; margin-bottom: 50px; margin-top: 10px;
+           display: flex; align-items: center; justify-content: center;
         }
-        .radar-ring {
+        .orb-layer {
            position: absolute; inset: 0; border-radius: 50%;
-           border: 2px solid transparent; border-top-color: var(--blue);
-           animation: radarSpin 3s linear infinite;
-           box-shadow: 0 0 20px rgba(10,132,255,0.1), inset 0 0 20px rgba(10,132,255,0.1);
+           filter: blur(12px); mix-blend-mode: screen;
+           animation: morphOrb 4s ease-in-out infinite alternate;
         }
-        .radar-ring.r1 { border-right-color: var(--orange); animation-duration: 2.5s; inset: 10px; }
-        .radar-ring.r2 { border-bottom-color: var(--green); animation-duration: 4s; animation-direction: reverse; inset: 20px; }
-        .radar-ring.r3 { border-left-color: var(--red); animation-duration: 5s; inset: 30px; }
-        
-        .radar-core {
-           position: absolute; inset: 40px; background: rgba(255,255,255,0.05);
-           border-radius: 50%; display: flex; align-items: center; justify-content: center;
-           box-shadow: inset 0 2px 10px rgba(255,255,255,0.1); backdrop-filter: blur(5px);
-           animation: pulseCore 2s ease-in-out infinite;
-           font-size: 24px;
+        .orb-layer.glow { background: var(--blue); filter: blur(30px); animation-duration: 5s; transform: scale(1.2); }
+        .orb-layer.color1 { background: var(--orange); opacity: 0.7; animation-delay: -1s; }
+        .orb-layer.color2 { background: var(--magenta); opacity: 0.7; animation-duration: 3s; animation-delay: -2s; }
+        .orb-content {
+           position: relative; z-index: 10; font-size: 28px;
+           animation: ghostBanana 10s infinite; opacity: 0; filter: blur(4px);
         }
 
-        @keyframes radarSpin { 100% { transform: rotate(360deg); } }
-        @keyframes pulseCore { 0%,100% { transform: scale(0.9); box-shadow: 0 0 10px rgba(10,132,255,0.2); } 50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(10,132,255,0.6); } }
+        @keyframes morphOrb {
+           0% { transform: scale(0.9) rotate(0deg); border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+           100% { transform: scale(1.1) rotate(180deg); border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+        }
+        @keyframes ghostBanana {
+           0%, 40%, 60%, 100% { opacity: 0; filter: blur(10px); transform: scale(0.5); }
+           48%, 52% { opacity: 0.9; filter: blur(0px); transform: scale(1.1); }
+        }
 
         .live-stats-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; width: 380px; }
         .ls-card {
