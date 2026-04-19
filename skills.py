@@ -432,7 +432,7 @@ async def scrape_search(
         await safe_goto(page, f"https://www.instagram.com/explore/search/keyword/?q={clean_keyword}")
         await browser.human_delay(3, 5)
 
-        max_scrolls, no_new = 40, 0
+        max_scrolls, no_new = 12, 0  # 12 scrolls max per keyword
         DOM_SEL = "a[href*='/p/'], a[href*='/reel/']"
         for i in range(max_scrolls):
             prev_count = len(state.posts)
