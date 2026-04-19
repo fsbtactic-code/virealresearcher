@@ -85,6 +85,10 @@ class MasterViralHunterParams(FilterMixin):
     time_limit_hours: int = Field(default=24, ge=1, le=168, description="Только посты моложе N часов")
 
 
+class LaunchGuiParams(BaseModel):
+    """No parameters needed — just opens the window."""
+
+
 # ── MCP Server ─────────────────────────────────────────
 
 app = Server("instagram-stealth-scraper")
@@ -135,6 +139,16 @@ async def list_tools() -> list[Tool]:
                 "исключение нулевого вовлечения."
             ),
             inputSchema=MasterViralHunterParams.model_json_schema(),
+        ),
+        Tool(
+            name="launch_gui",
+            description=(
+                "🖥️ Запускает главное окно Banana Parser с графическим интерфейсом. "
+                "Открывает нативное десктопное окно где пользователь может настроить "
+                "параметры парсинга, запустить сбор и увидеть дашборд с результатами. "
+                "Вызывается без параметров."
+            ),
+            inputSchema=LaunchGuiParams.model_json_schema(),
         ),
     ]
 
@@ -205,6 +219,21 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                     "results_json": result["results_json"],
                     "top_5_preview": result["top_posts"][:5],
                 }, ensure_ascii=False, indent=2),
+            )]
+
+        elif name == "launch_gui":
+            import subprocess
+            log.info("Launching GUI window...")
+            proc = subprocess.Popen(
+                [sys.executable, str(PROJECT_ROOT / "run_scraper.py")],
+                cwd=str(PROJECT_ROOT),
+            )
+            return [TextContent(
+                type="text",
+                text=json.dumps({
+                    "status": "ok",
+                    "message": "🖥️ Окно Banana Parser запущено (PID: " + str(proc.pid) + ")",
+                }, ensure_ascii=False),
             )]
 
         else:
