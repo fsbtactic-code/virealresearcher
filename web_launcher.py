@@ -45,8 +45,8 @@ def launch_gui(api_instance) -> None:
             url=str(LAUNCHER_HTML.resolve()),
             js_api=api_instance,
             width=580,
-            height=480,
-            min_size=(400, 350),
+            height=620,
+            min_size=(400, 500),
             resizable=True,
             background_color='#08080a',
         )

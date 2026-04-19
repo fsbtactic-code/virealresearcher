@@ -90,8 +90,30 @@
   }
   .credits-footer a { color: rgba(255,255,255,0.35); text-decoration: none; transition: color 0.2s; }
   .credits-footer a:hover { color: rgba(255,255,255,0.6); }
-  .credits-donate { color: rgba(255,200,50,0.5) !important; }
-  .credits-donate:hover { color: rgba(255,200,50,0.8) !important; }
+  .btn-donate {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 6px 16px; margin-top: 12px;
+    background: linear-gradient(135deg, rgba(255,214,10,0.1) 0%, rgba(255,159,10,0.1) 100%);
+    border: 1px solid rgba(255,214,10,0.3); border-radius: 100px;
+    color: #FFD60A !important; font-size: 0.7rem; font-weight: 600; text-decoration: none;
+    box-shadow: 0 4px 15px rgba(255,214,10,0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative; overflow: hidden;
+  }
+  .btn-donate:hover {
+    transform: translateY(-2px) scale(1.05);
+    background: linear-gradient(135deg, rgba(255,214,10,0.15) 0%, rgba(255,159,10,0.2) 100%);
+    border-color: rgba(255,214,10,0.6);
+    box-shadow: 0 6px 20px rgba(255,159,10,0.2), 0 0 12px rgba(255,214,10,0.3);
+    color: #fff !important;
+  }
+  /* Animation for donate button */
+  .btn-donate::after {
+    content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: shine 4s infinite;
+  }
+  @keyframes shine { 20% { left: 200%; } 100% { left: 200%; } }
 
   /* Scrolling Content */
   .scroll-area {
@@ -381,7 +403,10 @@
     <!-- Credits -->
     <div class="credits-footer">
       🍌 Создано — <a href="https://banana_marketing.t.me/" target="_blank">Banana Master</a> · <a href="https://www.threads.com/@hackmemasters" target="_blank">Threads</a><br>
-      <a href="https://pay.cloudtips.ru/p/ec9faa73" target="_blank" class="credits-donate">💰 Подкинуть на токены</a>
+      <a href="https://pay.cloudtips.ru/p/ec9faa73" target="_blank" class="btn-donate">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:2px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> 
+        Поддержать проект
+      </a>
     </div>
   </div>
 </div>
@@ -521,9 +546,12 @@
         </div>
 
         <!-- Stop Button -->
-        <button onclick="requestStop()" class="stop-btn">
-          <span>Остановить и показать</span>
-        </button>
+        <div class="stop-wrap">
+          <button onclick="requestStop()" class="stop-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+            <span>Остановить и показать</span>
+          </button>
+        </div>
       </div>
 
       <style>
@@ -566,12 +594,20 @@
         .ls-sub { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         .ls-sub .ls-val { font-size: 1.1rem; }
 
+        .stop-wrap { display: flex; justify-content: center; width: 100%; margin-top: auto; padding: 10px 0; }
         .stop-btn {
-           background: transparent; border: 1px solid rgba(255,69,58,0.3); color: rgba(255,69,58,0.9);
-           padding: 12px 28px; border-radius: 100px; font-size: 0.85rem; font-weight: 600;
-           cursor: pointer; position: relative; overflow: hidden; transition: all 0.3s;
+           background: linear-gradient(180deg, rgba(255,69,58,0.08) 0%, rgba(255,69,58,0.03) 100%);
+           border: 1px solid rgba(255,69,58,0.3); color: #ff3b30;
+           padding: 12px 32px; border-radius: 100px; font-size: 0.85rem; font-weight: 600;
+           cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+           box-shadow: 0 4px 15px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.02);
+           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .stop-btn:hover { background: rgba(255,69,58,0.1); border-color: rgba(255,69,58,0.6); color: #ff453a; box-shadow: 0 0 15px rgba(255,69,58,0.2); }
+        .stop-btn:hover { 
+           transform: translateY(-2px); background: rgba(255,69,58,0.15); 
+           border-color: rgba(255,69,58,0.8); color: #ff453a;
+           box-shadow: 0 8px 25px rgba(255,69,58,0.25), inset 0 1px 0 rgba(255,255,255,0.1); 
+        }
       </style>
     `;
   };
