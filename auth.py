@@ -157,23 +157,30 @@ async def run_auth():
         print(DIM("  (Или нажмите Enter для ручного сохранения)"))
         print()
 
-        # Auto-detect login: poll URL until it leaves /login/
+        # Auto-detect login: poll context cookies until sessionid appears
+        # URL check alone is unreliable — IG shows instagram.com/ even when NOT logged in
         logged_in = False
         max_wait = 300  # 5 minutes max
-        for _ in range(max_wait * 2):  # check every 0.5s
+        for tick in range(max_wait * 2):  # check every 0.5s
             try:
-                current_url = page.url
-                # Logged in = no longer on login/challenge page
-                if ("instagram.com" in current_url
-                    and "/login" not in current_url
-                    and "/challenge" not in current_url
-                    and "/accounts/" not in current_url):
+                cookies = await context.cookies()
+                session_cookie = next(
+                    (c for c in cookies if c.get("name") == "sessionid" and "instagram" in c.get("domain", "")),
+                    None
+                )
+                if session_cookie:
                     logged_in = True
                     print()
-                    print(GREEN("  🎉 Вход обнаружен! Сохраняю сессию..."))
-                    # Wait a bit for cookies to settle
-                    await asyncio.sleep(3)
+                    print(GREEN("  🎉 sessionid получен! Сохраняю сессию..."))
+                    # Extra wait for all cookies to settle after login
+                    await asyncio.sleep(4)
                     break
+
+                # Print progress every 10 seconds
+                if tick % 20 == 0 and tick > 0:
+                    elapsed = tick // 2
+                    print(DIM(f"  ⏱ Ожидание входа... {elapsed}с"), end="\r")
+
             except Exception:
                 pass
 
