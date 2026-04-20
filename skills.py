@@ -788,17 +788,8 @@ async def master_viral_hunter(
     search_ai_bulk = f_data.get("search_ai_bulk", False)
     if search_ai_bulk:
         log.info("[master] Step 4/4: RUNNING BULK AI CONCURRENT SEARCH...")
-        AI_SEARCH_KEYWORDS = [
-            "ChatGPT", "GPT", "OpenAI", "Claude", "Opus", "Sonnet", "Haiku", "Anthropic", 
-            "Gemini", "DeepMind", "DeepSeek", "Midjourney", "Copilot", "Cursor", "Perplexity", 
-            "Grok", "Mistral", "Mixtral", "Llama", "Sora", "DALL-E", "Diffusion", "Flux", 
-            "Runway", "Kling", "Pika", "Luma", "HeyGen", "ElevenLabs", "Synthesia", "Suno", 
-            "Udio", "Devin", "Windsurf", "Bolt", "Lovable", "Ollama", "Qwen", "LangChain", 
-            "AutoGPT", "ComfyUI", "Replicate", "AI", "LLM", "AGI", "prompt", "prompts", 
-            "prompting", "transformer", "embeddings", "fine-tuning", "tokens", "inference", 
-            "multimodal", "deepfake", "neural", "generative", "ai-generated", "ai-powered"
-        ]
-        
+        from interceptor import AI_KEYWORDS
+        AI_SEARCH_KEYWORDS = AI_KEYWORDS
         browser = StealthBrowser()
         await browser.launch(headless=False, hidden=True)
         sem = asyncio.Semaphore(3) # 3 concurrent tabs
