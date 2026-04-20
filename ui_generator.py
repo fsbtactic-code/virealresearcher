@@ -9,7 +9,7 @@ Features:
   - Custom animated checkboxes
   - CSV download + Google Sheets clipboard export
   - Sortable columns
-  - Footer with FilPars branding
+  - Footer with Banana Parser branding
 """
 import html
 import json
@@ -92,7 +92,7 @@ def generate_results_html(posts: list[dict[str, Any]], output_path: str) -> None
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FilPars — Результаты анализа</title>
+<title>Banana Parser — Результаты анализа</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -892,7 +892,7 @@ def generate_results_html(posts: list[dict[str, Any]], output_path: str) -> None
   <!-- Header -->
   <div class="header">
     <div class="header-left">
-      <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="#0A84FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; width:22px; height:22px;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg><h1 style="background: linear-gradient(135deg, var(--accent-1), var(--accent-2)); -webkit-background-clip: text; color: transparent;">FilPars</h1>
+      <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="#0A84FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; width:22px; height:22px;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg><h1 style="background: linear-gradient(135deg, var(--accent-1), var(--accent-2)); -webkit-background-clip: text; color: transparent;">Banana Parser</h1>
       <p>Найдено <span>{total_posts}</span> постов — ранжировано по Индексу Виральности</p>
     </div>
   </div>
@@ -948,7 +948,7 @@ def generate_results_html(posts: list[dict[str, Any]], output_path: str) -> None
     <div class="settings-inner">
       <div class="settings-grid">
         <div class="setting-group">
-          <div class="setting-label">❤️ Лайки</div>
+          <div class="setting-label">[ LIKES ] Лайки</div>
           <div class="setting-range">
             <input type="number" class="setting-input" id="f-min-likes" placeholder="мин" min="0">
             <span class="setting-sep">—</span>
@@ -956,7 +956,7 @@ def generate_results_html(posts: list[dict[str, Any]], output_path: str) -> None
           </div>
         </div>
         <div class="setting-group">
-          <div class="setting-label">💬 Комментарии</div>
+          <div class="setting-label">[ MSG ] Комментарии</div>
           <div class="setting-range">
             <input type="number" class="setting-input" id="f-min-comments" placeholder="мин" min="0">
             <span class="setting-sep">—</span>
@@ -980,7 +980,7 @@ def generate_results_html(posts: list[dict[str, Any]], output_path: str) -> None
           </div>
         </div>
         <div class="setting-group">
-          <div class="setting-label">🔥 Индекс виральности</div>
+          <div class="setting-label">[ FIRE ] Индекс виральности</div>
           <div class="setting-range">
             <input type="number" class="setting-input" id="f-min-velocity" placeholder="мин" min="0">
             <span class="setting-sep">—</span>
@@ -1025,9 +1025,9 @@ def generate_results_html(posts: list[dict[str, Any]], output_path: str) -> None
             <th class="th-right" onclick="sortTable(6)">Комменты</th>
             <th class="th-right" onclick="sortTable(7)">Просмотры</th>
             <th class="th-velocity" onclick="sortTable(8)">❤/ч</th>
-            <th class="th-velocity" onclick="sortTable(9)">💬/ч</th>
+            <th class="th-velocity" onclick="sortTable(9)">[ MSG ]/ч</th>
             <th class="th-velocity" onclick="sortTable(10)">👁/ч</th>
-            <th class="th-velocity" onclick="sortTable(11)">Индекс 🔥</th>
+            <th class="th-velocity" onclick="sortTable(11)">Индекс [ FIRE ]</th>
             <th class="th-right" onclick="sortTable(12)">Возраст</th>
             <th onclick="sortTable(13)">Источник</th>
           </tr>
@@ -1113,7 +1113,7 @@ function selectAll() {{
   const all = document.getElementById('check-all');
   all.checked = true;
   all.dispatchEvent(new Event('change'));
-  showToast('✅ Все строки выбраны');
+  showToast('[ OK ] Все строки выбраны');
 }}
 
 // ── Filtering ──

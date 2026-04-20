@@ -10,7 +10,6 @@ import logging
 import os
 import sys
 import threading
-import webbrowser
 from datetime import datetime
 from pathlib import Path
 import io
@@ -27,7 +26,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 # ══════════════════════════════════════════════
 #  LOGGING SETUP
 # ══════════════════════════════════════════════
-LOG_FILE = PROJECT_ROOT / "filpars.log"
+LOG_FILE = PROJECT_ROOT / "Banana Parser.log"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -38,10 +37,10 @@ logging.basicConfig(
         logging.StreamHandler(sys.stdout),
     ]
 )
-log = logging.getLogger("filpars")
+log = logging.getLogger("Banana Parser")
 
 log.info("=" * 60)
-log.info("🟦 FILPARS — ЗАПУСК")
+log.info("🟦 Banana Parser — ЗАПУСК")
 log.info(f"   Время:        {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 log.info(f"   Python:       {sys.version}")
 log.info(f"   Platform:     {sys.platform}")
@@ -49,16 +48,15 @@ log.info("=" * 60)
 
 # ── Imports after logging init ──
 try:
-    from interceptor import PostFilter
-    log.info("✅ interceptor.py импортирован")
+    log.info("[ OK ] interceptor.py импортирован")
 except ImportError as e:
-    log.error(f"❌ Не удалось импортировать interceptor: {e}")
+    log.error(f"[ ERROR ] Не удалось импортировать interceptor: {e}")
 
 try:
     from web_launcher import launch_gui, get_window
-    log.info("✅ web_launcher.py импортирован")
+    log.info("[ OK ] web_launcher.py импортирован")
 except ImportError as e:
-    log.critical(f"❌ Не удалось импортировать web_launcher: {e}")
+    log.critical(f"[ ERROR ] Не удалось импортировать web_launcher: {e}")
     sys.exit(1)
 
 # ── Terminal helpers ──
@@ -73,7 +71,7 @@ PURPLE = lambda t: _c("95", t)
 def print_banner():
     print()
     print(PURPLE("  ╔══════════════════════════════════════════════════════════════╗"))
-    print(PURPLE("  ║") + BOLD("🟦  FilPars — Instagram Stealth Scraper                        ") + PURPLE("║"))
+    print(PURPLE("  ║") + BOLD("🟦  Banana Parser — Instagram Stealth Scraper                        ") + PURPLE("║"))
     print(PURPLE("  ║") + DIM("  v3.0 | Stealth Mode | Turbo AI Search                        ") + PURPLE("║"))
     print(PURPLE("  ╚══════════════════════════════════════════════════════════════╝"))
     print()
@@ -83,19 +81,19 @@ def check_session() -> bool:
     """Checks if storage_state.json exists and has enough IG cookies."""
     state_file = PROJECT_ROOT / "storage_state.json"
     if not state_file.exists():
-        log.warning("❌ storage_state.json не найден — авторизация не выполнена")
+        log.warning("[ ERROR ] storage_state.json не найден — авторизация не выполнена")
         return False
     try:
         with open(state_file, "r", encoding="utf-8") as f:
             data = json.load(f)
     except Exception as e:
-        log.error(f"❌ Ошибка чтения storage_state.json: {e}")
+        log.error(f"[ ERROR ] Ошибка чтения storage_state.json: {e}")
         return False
     cookies = data.get("cookies", [])
     ig_cookies = [c for c in cookies if "instagram" in c.get("domain", "")]
     if len(ig_cookies) < 3:
         return False
-    log.info(f"✅ Сессия АКТИВНА ({len(ig_cookies)} IG-cookies)")
+    log.info(f"[ OK ] Сессия АКТИВНА ({len(ig_cookies)} IG-cookies)")
     return True
 
 
@@ -109,7 +107,7 @@ class WebWorkerApi:
 
     def stopScraping(self):
         """JS → Python: request graceful stop."""
-        log.info("📡 stopScraping() — запрос остановки")
+        log.info("[ NET ] stopScraping() — запрос остановки")
         self._stop_event.set()
 
     def getAuthStatus(self):
@@ -117,15 +115,15 @@ class WebWorkerApi:
 
     def startAuth(self):
         import subprocess
-        log.info("📡 startAuth() — запуск auth.py")
+        log.info("[ NET ] startAuth() — запуск auth.py")
         try:
-            proc = subprocess.run(
+            subprocess.run(
                 [sys.executable, "auth.py"],
                 check=True, capture_output=True, text=True
             )
             return True
         except Exception as e:
-            log.error(f"❌ Ошибка авторизации: {e}")
+            log.error(f"[ ERROR ] Ошибка авторизации: {e}")
             return False
 
     def toggleBrowser(self, show: bool):
@@ -136,11 +134,11 @@ class WebWorkerApi:
         loop = browser_core.global_loop
 
         if not gb or not getattr(gb, "_page", None):
-            log.warning("⚠️ toggleBrowser: браузер ещё не запущен или уже закрыт.")
+            log.warning("[ WARN ] toggleBrowser: браузер ещё не запущен или уже закрыт.")
             return False
 
         if not loop or not loop.is_running():
-            log.warning("⚠️ toggleBrowser: event loop не активен.")
+            log.warning("[ WARN ] toggleBrowser: event loop не активен.")
             return False
 
         if show:
@@ -153,7 +151,7 @@ class WebWorkerApi:
 
     def exportHTML(self, posts: list):
         """JS -> Python: Экспорт HTML через нативный SAVE диалог pywebview."""
-        log.info("📡 exportHTML() — экспорт красивого HTML")
+        log.info("[ NET ] exportHTML() — экспорт красивого HTML")
         try:
             import webview
             w = get_window()
@@ -179,14 +177,14 @@ class WebWorkerApi:
             # Импортируем существующий генератор
             from ui_generator import generate_results_html
             generate_results_html(posts, path)
-            log.info(f"✅ HTML успешно сохранен: {path}")
+            log.info(f"[ OK ] HTML успешно сохранен: {path}")
             return True
         except Exception as e:
-            log.error(f"❌ Ошибка экспорта HTML: {e}")
+            log.error(f"[ ERROR ] Ошибка экспорта HTML: {e}")
             return False
 
     def startScraping(self, gui_data: dict):
-        log.info("📡 startScraping() — получены данные из GUI")
+        log.info("[ NET ] startScraping() — получены данные из GUI")
         log.info(f"   gui_data: {json.dumps(gui_data, indent=2, ensure_ascii=False)}")
 
         # ── Проверка сессии ──
@@ -220,12 +218,8 @@ class WebWorkerApi:
             "max_scrolls":            gui_data.get("max_scrolls", 60),
             "min_posts_target":       gui_data.get("min_posts", 10),
             "enable_deep_search":     gui_data.get("deep_search", False),
-            "only_ai_topics":         gui_data.get("only_ai_topics", False),
+            "filter_keywords_raw":    gui_data.get("filter_keywords", ""),
             "only_ru_en":             gui_data.get("only_ru_en", False),
-            "ai_context_detection":   gui_data.get("ai_context_detection", False),
-            "search_ai_bulk":         gui_data.get("search_ai_bulk", False),
-            "ai_bulk_threads":        gui_data.get("ai_bulk_threads", 3),
-            "ai_bulk_scrolls":        gui_data.get("ai_bulk_scrolls", 0),
         }
 
         log.info(f"📋 Настройки: keyword={settings['seed_keyword']}, depth={settings['time_limit_hours']}h")
@@ -236,7 +230,7 @@ class WebWorkerApi:
             try:
                 w.evaluate_js("showBeautifulLoader()")
             except Exception as e:
-                log.error(f"❌ showBeautifulLoader: {e}")
+                log.error(f"[ ERROR ] showBeautifulLoader: {e}")
 
         # ── Сброс stop_event ──
         self._stop_event.clear()
@@ -288,7 +282,7 @@ class WebWorkerApi:
                 gathered   = result.get("total_collected", 0)
                 top_posts  = result.get("top_posts", [])
 
-                log.info(f"📊 Результат: {gathered} собрано, {len(top_posts)} в топе")
+                log.info(f"[ STAT ] Результат: {gathered} собрано, {len(top_posts)} в топе")
 
                 # Save results
                 results_path = Path(__file__).parent / "output" / "last_results.json"
@@ -321,9 +315,9 @@ class WebWorkerApi:
                     js_call = f"finishLoading({gathered}, `{posts_json_escaped}`)"
                     try:
                         w.evaluate_js(js_call)
-                        log.info("✅ Дашборд загружен")
+                        log.info("[ OK ] Дашборд загружен")
                     except Exception as e:
-                        log.error(f"❌ finishLoading: {e}")
+                        log.error(f"[ ERROR ] finishLoading: {e}")
 
             except Exception as e:
                 import traceback
@@ -339,7 +333,7 @@ class WebWorkerApi:
 
         t = threading.Thread(target=_bg_worker, name="ScraperWorker", daemon=True)
         t.start()
-        log.info(f"   ✅ Поток запущен: {t.name}")
+        log.info(f"   [ OK ] Поток запущен: {t.name}")
 
 
 # ══════════════════════════════════════════════
@@ -350,7 +344,7 @@ async def main():
     log.info("🏁 main() запущен")
 
     session_ok = check_session()
-    log.info(f"   Сессия: {'✅ OK' if session_ok else '❌ Нет сессии'}")
+    log.info(f"   Сессия: {'[ OK ] OK' if session_ok else '[ ERROR ] Нет сессии'}")
 
     api = WebWorkerApi()
     launch_gui(api)

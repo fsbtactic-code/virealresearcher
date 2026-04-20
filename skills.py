@@ -113,7 +113,7 @@ async def safe_goto(page, url: str, retries: int = 3, timeout: int = 45000):
                     state="attached",
                     timeout=timeout
                 )
-                log.info(f"✅ DOM content detected.")
+                log.info(f"[ OK ] DOM content detected.")
                 return True
             except Exception:
                 raise Exception("Functional selectors did not appear in time.")
@@ -197,14 +197,14 @@ async def resolve_pending_subtitles(
                         if post.is_reel:
                             global_state.reels_count += 1
                     promoted += 1
-                    log.info(f"[subtitle_check] ✅ Promoted via subtitles: {post.shortcode}")
+                    log.info(f"[subtitle_check] [ OK ] Promoted via subtitles: {post.shortcode}")
                 else:
                     state.filtered_out += 1
-                    log.debug(f"[subtitle_check] ❌ Rejected (subs no AI match): {post.shortcode}")
+                    log.debug(f"[subtitle_check] [ ERROR ] Rejected (subs no AI match): {post.shortcode}")
             else:
                 # Truly silent reel — discard
                 state.filtered_out += 1
-                log.debug(f"[subtitle_check] ❌ Rejected (no subs): {post.shortcode}")
+                log.debug(f"[subtitle_check] [ ERROR ] Rejected (no subs): {post.shortcode}")
 
         except Exception as exc:
             log.debug(f"[subtitle_check] Error on {post.shortcode}: {exc}")
@@ -249,7 +249,7 @@ async def auto_like_new_posts(page: Any, state: InterceptorState, global_state: 
                     btn = like_svg.locator("..").first
                     await btn.click()
                     g_state.liked_count += 1
-                    log.info(f"[auto_like] ❤️ Liked '{p.shortcode}' from feed (Total: {g_state.liked_count}/{max_likes})")
+                    log.info(f"[auto_like] [ LIKES ] Liked '{p.shortcode}' from feed (Total: {g_state.liked_count}/{max_likes})")
                     await asyncio.sleep(random.uniform(0.7, 1.3))
                 continue
 
@@ -268,7 +268,7 @@ async def auto_like_new_posts(page: Any, state: InterceptorState, global_state: 
                         btn = like_svg.locator("..").first
                         await btn.click(delay=180)
                         g_state.liked_count += 1
-                        log.info(f"[auto_like] ❤️ Liked '{p.shortcode}' from grid (Total: {g_state.liked_count}/{max_likes})")
+                        log.info(f"[auto_like] [ LIKES ] Liked '{p.shortcode}' from grid (Total: {g_state.liked_count}/{max_likes})")
                         await asyncio.sleep(random.uniform(0.7, 1.3))
                 except Exception:
                     pass
@@ -506,7 +506,7 @@ async def scrape_feed(
         await browser.close()
 
     log.info(f"[scrape_feed] Done — {len(state.posts)} posts, {state.filtered_out} filtered, {len(state.pending)} pending")
-    if state.pending and post_filter and post_filter.only_ai_topics:
+    if state.pending and post_filter and post_filter.filter_keywords:
         await resolve_pending_subtitles(state, post_filter)
         log.info(f"[scrape_feed] After subtitle check: {len(state.posts)} posts total")
     return _serialize_posts(state.posts)
@@ -627,7 +627,7 @@ async def scrape_explore(
         await browser.close()
 
     log.info(f"[scrape_explore] Done — {len(state.posts)} posts, {state.filtered_out} filtered, {len(state.pending)} pending")
-    if state.pending and post_filter and post_filter.only_ai_topics:
+    if state.pending and post_filter and post_filter.filter_keywords:
         await resolve_pending_subtitles(state, post_filter)
         log.info(f"[scrape_explore] After subtitle check: {len(state.posts)} posts total")
     return _serialize_posts(state.posts)
@@ -889,18 +889,17 @@ async def master_viral_hunter(
     f_data = filters or {}
     min_likes_val = f_data.get("min_likes", 0)
     excl_zero = f_data.get("exclude_zero_engagement", False)
-    only_ai = f_data.get("only_ai_topics", False)
+    filter_keywords_raw = f_data.get("filter_keywords_raw", "")
+    filter_keywords = [k.strip() for k in filter_keywords_raw.split(",") if k.strip()]
     only_ru_en = f_data.get("only_ru_en", False)
-    ai_context_det = f_data.get("ai_context_detection", False)
     post_filter = PostFilter(
         min_likes=min_likes_val,
         exclude_zero_engagement=excl_zero,
         max_age_hours=time_limit_hours,
-        only_ai_topics=only_ai,
-        only_ru_en=only_ru_en,
-        ai_context_detection=ai_context_det
+        filter_keywords=filter_keywords,
+        only_ru_en=only_ru_en
     )
-    log.info(f"[master] PostFilter: min_likes={min_likes_val}, excl_zero={excl_zero}, max_age={time_limit_hours}h, only_ai={only_ai}, only_ru_en={only_ru_en}, ai_detect={ai_context_det}")
+    log.info(f"[master] PostFilter: min_likes={min_likes_val}, excl_zero={excl_zero}, max_age={time_limit_hours}h, filters={filter_keywords}, only_ru_en={only_ru_en}")
 
     all_posts: list[dict] = []
     
@@ -950,106 +949,36 @@ async def master_viral_hunter(
     else:
         log.info("[master] Step 3/4: Skipping explore by user setting.")
 
-    search_ai_bulk = f_data.get("search_ai_bulk", False)
-    ai_bulk_threads = int(f_data.get("ai_bulk_threads", 3))
-    ai_bulk_scrolls = int(f_data.get("ai_bulk_scrolls", 0))
-    if search_ai_bulk:
-        log.info(f"[master] Step 4/4: RUNNING BULK AI CONCURRENT SEARCH ({ai_bulk_threads} threads)...")
-        from interceptor import AI_KEYWORDS
-        AI_SEARCH_KEYWORDS = AI_KEYWORDS
-        browser = StealthBrowser()
-        await browser.launch(headless=False, hidden=True)
-        sem = asyncio.Semaphore(ai_bulk_threads) # Dynamic concurrent tabs
-        
-        keywords_total = len(AI_SEARCH_KEYWORDS)
-        keywords_done = 0
-        current_status = f"Турбо-поиск: 0/{keywords_total}"
-        wrapped_cb({"collected": len(global_state.posts), "filtered": global_state.filtered_out, "reels": global_state.reels_count, "carousels": global_state.carousels_count, "photos": global_state.photos_count})
-
-        async def _worker(kw: str):
-            nonlocal keywords_done, current_status
-            
-            kw_u = kw.upper()
-            if ai_bulk_scrolls > 0:
-                dyn_scrolls = ai_bulk_scrolls
-            elif kw_u in ["CHATGPT", "GPT", "OPENAI", "CLAUDE", "OPUS", "SONNET", "HAIKU", "ANTHROPIC", "GEMINI"]:
-                dyn_scrolls = 15
-            elif kw_u in ["ELEVENLABS", "GROK"]:
-                dyn_scrolls = 10
-            else:
-                dyn_scrolls = 5
-                
-            # Disable extra AI topic text filtering since the search kw itself guarantees it's an AI post
-            local_filter = PostFilter(
-                min_likes=post_filter.min_likes,
-                exclude_zero_engagement=post_filter.exclude_zero_engagement,
-                max_age_hours=post_filter.max_age_hours,
-                only_ai_topics=False,
-                only_ru_en=post_filter.only_ru_en,
-                ai_context_detection=False  # Search keywords already guarantee AI topic
-            )
-            
-            async with sem:
-                if stop_event and stop_event.is_set(): return []
-                try:
-                    page = await browser.new_stealth_tab()
-                    results = await scrape_search_tab(
-                        browser=browser, page=page, keyword=kw,
-                        time_limit_hours=time_limit_hours, max_posts=50,
-                        post_filter=local_filter, scrolls_limit=dyn_scrolls,
-                        fetch_images=fetch_images, fetch_reels=fetch_reels,
-                        fetch_carousels=fetch_carousels, progress_cb=wrapped_cb,
-                        stop_event=stop_event, global_state=global_state
-                    )
-                    await page.close()
-                    keywords_done += 1
-                    current_status = f"Турбо-поиск: {keywords_done}/{keywords_total}"
-                    wrapped_cb({"collected": len(global_state.posts), "filtered": global_state.filtered_out, "reels": global_state.reels_count, "carousels": global_state.carousels_count, "photos": global_state.photos_count})
-                    
-                    return results
-                except Exception as e:
-                    log.error(f"[master_worker] {kw} failed: {e}")
-                    return []
-                    
-        tasks = [_worker(kw) for kw in AI_SEARCH_KEYWORDS]
-        all_res = await asyncio.gather(*tasks)
-        for r in all_res:
-            all_posts.extend(r)
-            
-        await browser.rescue_window()
-        await browser.close()
-
+    # Step 4 — standard Search keywords
+    log.info("[master] Step 4/4: Scraping standard keywords/search...")
+    if include_deep_search:
+        # Visit multiple related targets (up to 5 to avoid block)
+        total_std = len(keywords[:5])
+        for i, kw in enumerate(keywords[:5], 1):
+            if stop_event and stop_event.is_set():
+                log.info(f"[master] Stop event set before keyword {kw}")
+                break
+            current_status = f"Поиск: {i}/{total_std}"
+            wrapped_cb({"collected": len(global_state.posts), "filtered": global_state.filtered_out, "reels": global_state.reels_count, "carousels": global_state.carousels_count, "photos": global_state.photos_count})
+            try:
+                all_posts.extend(await scrape_search(kw, time_limit_hours, max_posts=50, post_filter=post_filter, scrolls_limit=max_scrolls, fetch_images=fetch_images, fetch_reels=fetch_reels, fetch_carousels=fetch_carousels, progress_cb=wrapped_cb, stop_event=stop_event, global_state=global_state))
+            except Exception as exc:
+                log.error(f"[master] Search '{kw}' failed: {exc}")
+            await asyncio.sleep(random.uniform(2, 4))
     else:
-        # Step 4 — standard Search keywords
-        log.info("[master] Step 4/4: Scraping standard keywords/search...")
-        if include_deep_search:
-            # Visit multiple related targets (up to 5 to avoid block)
-            total_std = len(keywords[:5])
-            for i, kw in enumerate(keywords[:5], 1):
-                if stop_event and stop_event.is_set():
-                    log.info(f"[master] Stop event set before keyword {kw}")
-                    break
-                current_status = f"Поиск: {i}/{total_std}"
-                wrapped_cb({"collected": len(global_state.posts), "filtered": global_state.filtered_out, "reels": global_state.reels_count, "carousels": global_state.carousels_count, "photos": global_state.photos_count})
-                try:
-                    all_posts.extend(await scrape_search(kw, time_limit_hours, max_posts=50, post_filter=post_filter, scrolls_limit=max_scrolls, fetch_images=fetch_images, fetch_reels=fetch_reels, fetch_carousels=fetch_carousels, progress_cb=wrapped_cb, stop_event=stop_event, global_state=global_state))
-                except Exception as exc:
-                    log.error(f"[master] Search '{kw}' failed: {exc}")
-                await asyncio.sleep(random.uniform(2, 4))
-        else:
-            # Safe mode: Iterate exactly over the provided keywords
-            total_std = len(keywords)
-            for i, kw in enumerate(keywords, 1):
-                if stop_event and stop_event.is_set():
-                    log.info(f"[master] Stop event set before keyword {kw}")
-                    break
-                current_status = f"Поиск: {i}/{total_std}"
-                wrapped_cb({"collected": len(global_state.posts), "filtered": global_state.filtered_out, "reels": global_state.reels_count, "carousels": global_state.carousels_count, "photos": global_state.photos_count})
-                try:
-                    all_posts.extend(await scrape_search(kw, time_limit_hours, max_posts=50, post_filter=post_filter, scrolls_limit=max_scrolls, fetch_images=fetch_images, fetch_reels=fetch_reels, fetch_carousels=fetch_carousels, progress_cb=wrapped_cb, stop_event=stop_event, global_state=global_state))
-                except Exception as exc:
-                    log.error(f"[master] Search '{kw}' failed: {exc}")
-                await asyncio.sleep(random.uniform(2, 4))
+        # Safe mode: Iterate exactly over the provided keywords
+        total_std = len(keywords)
+        for i, kw in enumerate(keywords, 1):
+            if stop_event and stop_event.is_set():
+                log.info(f"[master] Stop event set before keyword {kw}")
+                break
+            current_status = f"Поиск: {i}/{total_std}"
+            wrapped_cb({"collected": len(global_state.posts), "filtered": global_state.filtered_out, "reels": global_state.reels_count, "carousels": global_state.carousels_count, "photos": global_state.photos_count})
+            try:
+                all_posts.extend(await scrape_search(kw, time_limit_hours, max_posts=50, post_filter=post_filter, scrolls_limit=max_scrolls, fetch_images=fetch_images, fetch_reels=fetch_reels, fetch_carousels=fetch_carousels, progress_cb=wrapped_cb, stop_event=stop_event, global_state=global_state))
+            except Exception as exc:
+                log.error(f"[master] Search '{kw}' failed: {exc}")
+            await asyncio.sleep(random.uniform(2, 4))
 
     # Deduplicate
     seen: set[str] = set()

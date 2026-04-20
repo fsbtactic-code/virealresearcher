@@ -1,14 +1,14 @@
-# FilPars — Claude Code Instructions
+# Banana Parser — Claude Code Instructions
 
 ## Slash Commands
 
-- `/filpars-install` — Установить всё: зависимости, Playwright, проверить готовность
-- `/filparsauth` — Открыть защищенное окно для входа в Instagram
-- `/filparsrun` — Запустить главное окно парсера (в отдельном процессе)
+- `/banana-install` — Установить всё: зависимости, Playwright, проверить готовность
+- `/banana-auth` — Открыть защищенное окно для входа в Instagram
+- `/banana-run` — Запустить главное окно парсера (в отдельном процессе)
 
 ## What is this?
 
-FilPars — Instagram stealth scraper. Десктопное приложение (pywebview + Playwright) для поиска вирусного контента конкурентов.
+Banana Parser — Instagram stealth scraper. Десктопное приложение (pywebview + Playwright) для поиска вирусного контента конкурентов.
 
 ## Quick Setup
 

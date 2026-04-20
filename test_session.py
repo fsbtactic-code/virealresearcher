@@ -27,7 +27,7 @@ DIM    = lambda t: _c("2",  t)
 def check_storage() -> dict | None:
     """Читает и валидирует storage_state.json."""
     if not STORAGE_STATE.exists():
-        print(RED("  ❌ storage_state.json не найден — сначала запустите auth.py"))
+        print(RED("  [ ERROR ] storage_state.json не найден — сначала запустите auth.py"))
         return None
 
     with open(STORAGE_STATE, "r", encoding="utf-8") as f:
@@ -44,10 +44,10 @@ def check_storage() -> dict | None:
     session_cookie = next((c for c in ig_cookies if c.get("name") == "sessionid"), None)
     if session_cookie:
         val = session_cookie.get("value", "")
-        print(f"  🔑 sessionid:     {GREEN(val[:12] + '...' + val[-6:])}")
+        print(f"  [ AUTH ] sessionid:     {GREEN(val[:12] + '...' + val[-6:])}")
         return data
     else:
-        print(YELLOW("  ⚠️  sessionid не найден — сессия может быть невалидна"))
+        print(YELLOW("  [ WARN ]  sessionid не найден — сессия может быть невалидна"))
         return data
 
 
@@ -55,7 +55,7 @@ async def verify_session():
     """Открывает headed браузер с сохранёнными cookies, проверяет сессию."""
     print()
     print(_c("95", "  ╔══════════════════════════════════════════════════════════════╗"))
-    print(_c("95", "  ║") + BOLD("🟦  FilPars — Проверка сессии Instagram               ") + _c("95", "║"))
+    print(_c("95", "  ║") + BOLD("🟦  Banana Parser — Проверка сессии Instagram               ") + _c("95", "║"))
     print(_c("95", "  ╚══════════════════════════════════════════════════════════════╝"))
     print()
 
@@ -64,7 +64,7 @@ async def verify_session():
         return False
 
     print()
-    print(CYAN("  🚀 Открываю браузер с сохранёнными cookies..."))
+    print(CYAN("  [ RUN ] Открываю браузер с сохранёнными cookies..."))
     print(DIM("  (Окно закроется автоматически через 10 секунд)"))
     print()
 
@@ -97,7 +97,7 @@ async def verify_session():
         try:
             await page.goto("https://www.instagram.com/", wait_until="domcontentloaded", timeout=30000)
         except Exception as e:
-            print(YELLOW(f"  ⚠️  Медленная загрузка: {e}"))
+            print(YELLOW(f"  [ WARN ]  Медленная загрузка: {e}"))
 
         await asyncio.sleep(3)
         current_url = page.url
@@ -108,7 +108,7 @@ async def verify_session():
         username = None
 
         if "/accounts/login" in current_url or "/accounts/emailsignup" in current_url:
-            print(RED("  ❌ СЕССИЯ УСТАРЕЛА — Instagram перенаправил на логин"))
+            print(RED("  [ ERROR ] СЕССИЯ УСТАРЕЛА — Instagram перенаправил на логин"))
             print(YELLOW("     Запустите python auth.py снова для обновления сессии"))
         else:
             # Пробуем вытащить username из профиля
@@ -123,13 +123,13 @@ async def verify_session():
                         username = href.strip("/")
 
                 logged_in = True
-                print(GREEN("  ✅ СЕССИЯ АКТИВНА — Instagram открылся без логина!"))
+                print(GREEN("  [ OK ] СЕССИЯ АКТИВНА — Instagram открылся без логина!"))
                 if username:
                     print(GREEN(f"  👤 Аккаунт:  @{username}"))
                 print(f"  📰 Заголовок: {DIM(title[:60])}")
             except Exception:
                 logged_in = True
-                print(GREEN("  ✅ СЕССИЯ АКТИВНА"))
+                print(GREEN("  [ OK ] СЕССИЯ АКТИВНА"))
 
         print()
         print(DIM("  Окно закроется через 8 секунд..."))
@@ -138,11 +138,11 @@ async def verify_session():
 
     print()
     if logged_in:
-        print(_c("42;97", "  ✅ Сессия валидна. Можно запускать парсинг:              "))
+        print(_c("42;97", "  [ OK ] Сессия валидна. Можно запускать парсинг:              "))
         print()
         print(f"     {BOLD('python run_scraper.py')}")
     else:
-        print(_c("41;97", "  ❌ Сессия недействительна. Запустите: python auth.py     "))
+        print(_c("41;97", "  [ ERROR ] Сессия недействительна. Запустите: python auth.py     "))
     print()
 
     return logged_in
@@ -156,5 +156,5 @@ if __name__ == "__main__":
         sys.exit(0 if result else 1)
     except KeyboardInterrupt:
         print()
-        print(RED("  ❌ Прервано."))
+        print(RED("  [ ERROR ] Прервано."))
         sys.exit(1)

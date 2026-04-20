@@ -1,10 +1,10 @@
 ---
-description: Диагностика и автоматический самодебаг FilPars
+description: Диагностика и автоматический самодебаг Banana Parser
 ---
-Выполни полную автодиагностику FilPars и исправь все найденные проблемы:
+Выполни полную автодиагностику Banana Parser и исправь все найденные проблемы:
 
 ## ШАГ 1: Прочитай архитектуру
-Прочитай `.ai-context.md` в папке проекта. Найди путь через `~/.filpars_path` (Mac: `cat ~/.filpars_path`, Win: `type $env:USERPROFILE\.filpars_path`).
+Прочитай `.ai-context.md` в папке проекта. Найди путь через `~/.Banana Parser_path` (Mac: `cat ~/.Banana Parser_path`, Win: `type $env:USERPROFILE\.Banana Parser_path`).
 
 ## ШАГ 2: Проверь все импорты
 ```
@@ -31,7 +31,7 @@ python3 -c "from playwright.sync_api import sync_playwright; p = sync_playwright
 ```
 
 ## ШАГ 4: Проверь storage_state.json
-Если файла нет — ПРЕДУПРЕДИ пользователя: "Нет активной сессии Instagram. Нужно запустить `/filparsauth`". Не запускай парсер без него.
+Если файла нет — ПРЕДУПРЕДИ пользователя: "Нет активной сессии Instagram. Нужно запустить `/banana-auth`". Не запускай парсер без него.
 
 ## ШАГ 5: Проверь MCP сервер
 ```
@@ -51,13 +51,13 @@ except Exception as e:
 ## ШАГ 6: Проверь конфиг Claude
 Найди `~/.claude.json` и убедись что есть блок:
 ```json
-"filpars": {
+"Banana Parser": {
   "command": "python3",
   "args": ["/PATH/TO/mcp_server.py"],
-  "cwd": "/PATH/TO/filpars"
+  "cwd": "/PATH/TO/Banana Parser"
 }
 ```
-Если нет — добавь, используя реальный путь из `~/.filpars_path`.
+Если нет — добавь, используя реальный путь из `~/.Banana Parser_path`.
 
 ## ШАГ 7: Запусти тест
 ```

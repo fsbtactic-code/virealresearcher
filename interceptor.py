@@ -14,47 +14,6 @@ from dataclasses import dataclass, field
 from typing import Any, Optional
 
 log = logging.getLogger(__name__)
-AI_KEYWORDS = [k.strip().lower() for k in (
-    "ChatGPT, GPT, OpenAI, Claude, Opus, Sonnet, Haiku, Anthropic, Gemini, DeepMind, DeepSeek, "
-    "Midjourney, Copilot, Cursor, Perplexity, Grok, Mistral, Mixtral, Llama, Sora, DALL-E, "
-    "Stable Diffusion, Flux, Runway, Kling, Pika, Luma, HeyGen, ElevenLabs, Synthesia, Suno, "
-    "Udio, Devin, Windsurf, Bolt, Lovable, Ollama, Qwen, LangChain, AutoGPT, ComfyUI, Replicate, "
-    "Hugging Face, AI, LLM, AGI, нейросеть, ИИ, "
-    "ai-generated, ai generated, made with ai, built with ai, powered by ai, "
-    "ai tool, ai tools, ai art, ai video, ai voice, ai music, ai coding, "
-    "ai automation, ai workflow, ai agent, ai startup, "
-    "vibe coding, vibe-coding, "
-    "prompt, prompting, prompts, "
-    "text to image, text to video, no-code ai, ai wrapper, "
-    "neural network, deep learning, machine learning, "
-    "fine-tuning, fine tuning, generative ai, artificial intelligence, "
-    "ai revolution, ai hype, replaced by ai, ai will replace, future of ai, "
-    "trained the model, ai-powered, ai powered, use ai, using ai, "
-    "asked chatgpt, chatgpt said, gpt wrote, "
-    "ai написал, нейросеть написала, нейросеть сгенерировала, сделано нейросетью, "
-    "генерация, промпт, промпты, "
-    "Diffusion, transformer, embeddings, tokens, inference, multimodal, "
-    "deepfake, neural, generative, "
-    "a.i., искусственный интеллект, нейросети, нейронка, нейронки, "
-    "large language model, большая языковая модель, genai"
-).split(", ")]
-
-def text_has_ai_topics(text: str) -> bool:
-    if not text:
-        return False
-    text_lower = text.lower()
-    text_words = set(re.findall(r'[\w]+', text_lower))
-    for k in AI_KEYWORDS:
-        if k in text_words:
-            return True
-        elif len(k) > 4 and k in text_lower:
-            return True
-        elif ' ' in k and k in text_lower:
-            return True
-        elif k == 'a.i.' and 'a.i.' in text_lower:
-            return True
-    return False
-
 
 @dataclass
 class PostFilter:
@@ -69,9 +28,8 @@ class PostFilter:
     min_followers: int = 0
     max_age_hours: Optional[int] = None
     exclude_zero_engagement: bool = False  # skip posts with 0 likes AND 0 comments
-    only_ai_topics: bool = False
+    filter_keywords: list[str] = field(default_factory=list)
     only_ru_en: bool = False
-    ai_context_detection: bool = False
 
     def matches(self, post: "PostData") -> bool:
         """Return True if the post passes all filter criteria."""
@@ -101,25 +59,26 @@ class PostFilter:
         if self.min_followers > 0 and post.owner_followers < self.min_followers:
             return False
             
-        # IA filter: strict keyword match + optional smart context detection
-        if self.only_ai_topics:
+        # Custom keywords filter
+        if self.filter_keywords:
             all_text = (post.caption_text or "") + (getattr(post, 'alt_text', '') or "") + (getattr(post, 'subtitles_text', '') or "")
-            # Strip emojis, punctuation, urls and whitespace — count only real words
             meaningful = re.sub(r'#\w+|@\w+|https?://\S+|[^\w\sа-яА-ЯёЁa-zA-Z]', '', all_text).strip()
+            
             if not meaningful:
-                # No text signal — defer to subtitle batch fetch (not pass-through, not discard)
-                return None  # add_post() will put in state.pending
-            elif text_has_ai_topics(post.caption_text):
-                pass  # keyword match succeeded
-            elif self.ai_context_detection:
-                from ai_detector import is_ai_content
-                if not is_ai_content(
-                    caption=post.caption_text,
-                    alt_text=getattr(post, 'alt_text', ''),
-                    subtitles=getattr(post, 'subtitles_text', ''),
-                ):
-                    return False
-            else:
+                # No text signal — defer to subtitle batch fetch
+                return None  
+
+            text_lower = all_text.lower()
+            text_words = set(re.findall(r'[\w]+', text_lower))
+            match_found = False
+            for k in self.filter_keywords:
+                k_lower = k.lower().strip()
+                if not k_lower: continue
+                if k_lower in text_words or k_lower in text_lower:
+                    match_found = True
+                    break
+                    
+            if not match_found:
                 return False
 
         # Advanced Language detection filter (RU/EN precision)
