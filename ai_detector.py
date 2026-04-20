@@ -60,7 +60,7 @@ HIGH_SIGNAL_SINGLE = {
     "deepseek", "multimodal", "diffusion", "langchain", "autogpt",
     "gpt4", "gpt-4", "gpt3", "gpt-3", "claude3", "claude-3",
     "dall-e", "dalle", "heygen", "elevenlabs", "synthesia", "suno", "udio",
-    "vibe-coding", "vibecoding",
+    "gemini", "kling", "cursor", "vibe-coding", "vibecoding",
     # RU
     "нейросетью", "нейросети", "нейронку", "нейронкой", "промпт", "промптинг",
     "генеративный", "генеративной", "искусственным", "искусственного",
