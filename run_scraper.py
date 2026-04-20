@@ -128,6 +128,27 @@ class WebWorkerApi:
             log.error(f"❌ Ошибка авторизации: {e}")
             return False
 
+    def toggleBrowser(self, show: bool):
+        """Show or hide the headless browser (e.g., to solve captchas)."""
+        import asyncio
+        from browser_core import global_browser
+        from config import log
+        if global_browser and getattr(global_browser, "_page", None):
+            try:
+                loop = global_browser._page.loop
+            except AttributeError:
+                loop = asyncio.get_event_loop()
+            if show:
+                log.info("👁️ Показываем окно браузера для верификации...")
+                asyncio.run_coroutine_threadsafe(global_browser.show_window(), loop)
+            else:
+                log.info("🙈 Скрываем окно браузера...")
+                asyncio.run_coroutine_threadsafe(global_browser.hide_window(), loop)
+            return True
+        else:
+            log.warning("Браузер еще не запущен или уже закрыт.")
+            return False
+
     def exportHTML(self, posts: list):
         """JS -> Python: Экспорт HTML через нативный SAVE диалог pywebview."""
         log.info("📡 exportHTML() — экспорт красивого HTML")

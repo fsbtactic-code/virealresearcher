@@ -52,10 +52,14 @@ def _bezier_point(t: float, p0: float, p1: float, p2: float, p3: float) -> float
     )
 
 
+global_browser = None
+
 class StealthBrowser:
     """Manages a stealth Playwright browser context."""
 
     def __init__(self) -> None:
+        global global_browser
+        global_browser = self
         self._pw: Optional[Playwright] = None
         self._context: Optional[BrowserContext] = None
         self._page: Optional[Page] = None
@@ -126,6 +130,38 @@ class StealthBrowser:
         await stealth.apply_stealth_async(page)
         await page.route("**/*", _block_media)
         return page
+
+    async def show_window(self):
+        """Brings the window to the front explicitly (e.g., for captcha solving)."""
+        if not getattr(self, "_context", None) or not getattr(self, "_page", None):
+            return
+        try:
+            session = await self._context.new_cdp_session(self._page)
+            target_info = await session.send("Target.getTargetInfo")
+            res = await session.send("Browser.getWindowForTarget", {"targetId": target_info["targetInfo"]["targetId"]})
+            await session.send("Browser.setWindowBounds", {
+                "windowId": res["windowId"],
+                "bounds": {"windowState": "normal", "left": 50, "top": 50, "width": 1280, "height": 800}
+            })
+            # Bring to front using page evaluate + cdp
+            await self._page.bring_to_front()
+        except Exception as e:
+            log.debug(f"Failed to show window: {e}")
+
+    async def hide_window(self):
+        """Shrinks or moves the window away after captcha is solved."""
+        if not getattr(self, "_context", None) or not getattr(self, "_page", None):
+            return
+        try:
+            session = await self._context.new_cdp_session(self._page)
+            target_info = await session.send("Target.getTargetInfo")
+            res = await session.send("Browser.getWindowForTarget", {"targetId": target_info["targetInfo"]["targetId"]})
+            await session.send("Browser.setWindowBounds", {
+                "windowId": res["windowId"],
+                "bounds": {"windowState": "normal", "left": -32000, "top": -32000, "width": 100, "height": 100}
+            })
+        except Exception as e:
+            log.debug(f"Failed to hide window: {e}")
 
     async def rescue_window(self):
         """Returns the window position back to viewable area with micro-size as requested."""

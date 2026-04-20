@@ -650,11 +650,14 @@
           <div style="color:rgba(255,255,255,0.2); font-size:0.75rem; margin-top:8px;">Отфильтровано (старые/не подходят): <strong id="statFiltered">0</strong></div>
         </div>
 
-        <!-- Stop Button -->
-        <div class="stop-wrap">
+        <!-- Stop & Show Browser Buttons -->
+        <div class="stop-wrap" style="display:flex; gap:12px; justify-content:center;">
           <button onclick="requestStop()" class="stop-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
-            <span>Остановить и показать</span>
+            <span>Остановить парсер</span>
+          </button>
+          <button onclick="toggleBrowserView()" class="stop-btn" id="btnBrowser" style="background: rgba(255,165,0,0.15); color: #ffb74d; border: 1px solid rgba(255,165,0,0.2);">
+            👁️ <span>Показать браузер</span>
           </button>
         </div>
       </div>
@@ -722,6 +725,26 @@
     if (window.pywebview) window.pywebview.api.stopScraping();
     const btn = document.querySelector('.stop-btn');
     if (btn) { btn.innerHTML = '<span>⏳ Останавливаем...</span>'; btn.disabled = true; }
+  }
+
+  let browserVisible = false;
+  function toggleBrowserView() {
+    browserVisible = !browserVisible;
+    if (window.pywebview) window.pywebview.api.toggleBrowser(browserVisible);
+    const btn = document.getElementById('btnBrowser');
+    if (btn) {
+      if (browserVisible) {
+        btn.innerHTML = '🙈 <span style="margin-left:5px;">Скрыть браузер</span>';
+        btn.style.background = 'rgba(48,209,88,0.15)';
+        btn.style.color = '#30D158';
+        btn.style.borderColor = 'rgba(48,209,88,0.3)';
+      } else {
+        btn.innerHTML = '👁️ <span style="margin-left:5px;">Показать браузер</span>';
+        btn.style.background = 'rgba(255,165,0,0.15)';
+        btn.style.color = '#ffb74d';
+        btn.style.borderColor = 'rgba(255,165,0,0.2)';
+      }
+    }
   }
 
   window.finishLoading = function(actualCount, postsJsonStr) {
