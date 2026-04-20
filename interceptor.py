@@ -103,7 +103,14 @@ class PostFilter:
             
         # IA filter: strict keyword match + optional smart context detection
         if self.only_ai_topics:
-            if text_has_ai_topics(post.caption_text):
+            all_text = (post.caption_text or "") + (getattr(post, 'alt_text', '') or "") + (getattr(post, 'subtitles_text', '') or "")
+            # Strip emojis, punctuation, urls and whitespace — count only real words
+            meaningful = re.sub(r'#\w+|@\w+|https?://\S+|[^\w\sа-яА-ЯёЁa-zA-Z]', '', all_text).strip()
+            if not meaningful:
+                # No text signal at all (common for Reels/short clips) — pass through
+                # Can't judge IA relevance without any text, better a false-positive than missing a viral reel
+                pass
+            elif text_has_ai_topics(post.caption_text):
                 pass  # keyword match succeeded
             elif self.ai_context_detection:
                 from ai_detector import is_ai_content
@@ -227,19 +234,25 @@ def _matches_ig_api(url: str) -> bool:
 def _detect_post_type(node: dict) -> str:
     media_type = node.get("media_type")
     product_type = node.get("product_type", "")
-    if product_type == "clips" or node.get("is_reel_media"):
-        return "reel"
     typename = node.get("__typename", "")
+    # Reels detection: clips product type, reel media flag, XDTGraphVideo/Reel, or clips_metadata
+    if (product_type == "clips" or node.get("is_reel_media")
+            or typename in ("XDTGraphVideo", "XDTGraphReel")
+            or node.get("clips_metadata") is not None):
+        return "reel"
     if typename in ("GraphSidecar", "XDTGraphSidecar") or node.get("carousel_media_count", 0) > 0:
         return "carousel"
     if media_type == 8:
         return "carousel"
     if media_type == 2:
+        # media_type=2 is video. Reels have video-specific indicators.
+        if node.get("video_duration") or node.get("has_audio") or node.get("ig_play_count"):
+            return "reel"
         return "video"
     if media_type == 1:
         return "image"
     if typename == "GraphVideo" or node.get("is_video"):
-        return "video"
+        return "reel"  # GraphVideo in timeline feed is always a Reel
     return "image"
 
 
