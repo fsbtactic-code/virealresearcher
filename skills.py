@@ -155,6 +155,8 @@ async def auto_like_new_posts(page: Any, state: InterceptorState, global_state: 
             continue
             
         try:
+            import asyncio, random
+            # 1) Пытаемся найти пост как статью в ленте (Feed)
             article_loc = page.locator(f"article:has(a[href*='/{p.shortcode}/'])").first
             if await article_loc.count() > 0:
                 like_svg = article_loc.locator("svg[aria-label='Нравится'], svg[aria-label='Like']").first
@@ -162,11 +164,36 @@ async def auto_like_new_posts(page: Any, state: InterceptorState, global_state: 
                     btn = like_svg.locator("..").first
                     await btn.click()
                     g_state.liked_count += 1
-                    log.info(f"[auto_like] ❤️ Liked '{p.shortcode}' (Total session likes: {g_state.liked_count}/{max_likes})")
-                    import asyncio, random
+                    log.info(f"[auto_like] ❤️ Liked '{p.shortcode}' from feed (Total: {g_state.liked_count}/{max_likes})")
                     await asyncio.sleep(random.uniform(0.7, 1.3))
-        except Exception:
-            pass
+                continue
+
+            # 2) Пытаемся найти пост как сетку (Explore / Search)
+            grid_link = page.locator(f"a[href*='/{p.shortcode}/']").first
+            if await grid_link.count() > 0:
+                await grid_link.scroll_into_view_if_needed()
+                await grid_link.click(delay=140)
+                
+                # Ждем открытия модалки
+                dialog = page.locator("div[role='dialog']").first
+                try:
+                    await dialog.wait_for(state="visible", timeout=4000)
+                    like_svg = dialog.locator("svg[aria-label='Нравится'], svg[aria-label='Like']").first
+                    if await like_svg.count() > 0:
+                        btn = like_svg.locator("..").first
+                        await btn.click(delay=180)
+                        g_state.liked_count += 1
+                        log.info(f"[auto_like] ❤️ Liked '{p.shortcode}' from grid (Total: {g_state.liked_count}/{max_likes})")
+                        await asyncio.sleep(random.uniform(0.7, 1.3))
+                except Exception:
+                    pass
+                finally:
+                    # Закрываем модалку кнопкой Escape
+                    await page.keyboard.press("Escape")
+                    await asyncio.sleep(random.uniform(0.5, 0.9))
+
+        except Exception as e:
+            log.debug(f"[auto_like] error on {p.shortcode}: {e}")
 
 def _serialize_posts(posts: list[PostData]) -> list[dict]:
     results = []
