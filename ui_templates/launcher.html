@@ -362,7 +362,7 @@
 
       <div class="section-title">Источники и Лимиты</div>
 
-      <div class="source-grid">
+      <div class="source-grid-3">
         <div class="card source-card toggle-row" onclick="toggle('scrape_explore')">
           <span class="toggle-text has-icon" id="lbl_explore" data-color="orange">
             <!-- Fire Icon -->
@@ -374,10 +374,11 @@
             <div class="knob"></div>
           </label>
         </div>
-        <input type="number" id="explore_limit" class="input" value="80" min="0">
+        <input type="number" id="explore_limit" class="input" value="80" min="0" placeholder="Постов" title="Лимит постов">
+        <input type="number" id="explore_scrolls" class="input" value="20" min="1" placeholder="Скроллов" title="Лимит скроллов">
       </div>
 
-      <div class="source-grid">
+      <div class="source-grid-3">
         <div class="card source-card toggle-row" onclick="toggle('scrape_feed')">
           <span class="toggle-text has-icon" id="lbl_feed" data-color="blue">
             <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
@@ -388,7 +389,8 @@
             <div class="knob"></div>
           </label>
         </div>
-        <input type="number" id="feed_limit" class="input" value="40" min="0">
+        <input type="number" id="feed_limit" class="input" value="40" min="0" placeholder="Постов" title="Лимит постов">
+        <input type="number" id="feed_scrolls" class="input" value="15" min="1" placeholder="Скроллов" title="Лимит скроллов">
       </div>
 
       <div class="card toggle-row" onclick="toggle('search_ai_bulk')" style="padding:16px 18px; margin-bottom:6px; border: 1px solid rgba(0,89,255,0.35); background: rgba(0,89,255,0.06);">
@@ -537,7 +539,7 @@
   }
 
   const last = JSON.parse(localStorage.getItem('filpars_last_config') || '{}');
-  const fields = ['keyword','depth','top_n','explore_limit','feed_limit','min_likes'];
+  const fields = ['keyword','depth','top_n','explore_limit','explore_scrolls','feed_limit','feed_scrolls','min_likes'];
   const checks = ['scrape_explore','scrape_feed','search_ai_bulk','no_zero','only_ai_topics','fetch_images','fetch_reels','fetch_carousels'];
   fields.forEach(f => { if(last[f] !== undefined){ const el = document.getElementById(f); if(el) el.value = last[f]; }});
   checks.forEach(c => { if(last[c] !== undefined){ const el = document.getElementById(c); if(el) el.checked = last[c]; }});
