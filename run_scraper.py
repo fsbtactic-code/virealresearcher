@@ -220,6 +220,7 @@ class WebWorkerApi:
             "enable_deep_search":     gui_data.get("deep_search", False),
             "only_ai_topics":         gui_data.get("only_ai_topics", False),
             "search_ai_bulk":         gui_data.get("search_ai_bulk", False),
+            "ai_bulk_threads":        gui_data.get("ai_bulk_threads", 3),
         }
 
         log.info(f"📋 Настройки: keyword={settings['seed_keyword']}, depth={settings['time_limit_hours']}h")

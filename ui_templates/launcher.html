@@ -409,18 +409,26 @@
         </div>
       </div>
 
-      <div class="card toggle-row" onclick="toggle('search_ai_bulk')" style="padding:16px 18px; margin-bottom:6px; border: 1px solid rgba(0,89,255,0.35); background: rgba(0,89,255,0.06);">
-        <span class="toggle-text has-icon active-icon-gray" id="lbl_search_ai_bulk">
-          <svg class="icon" viewBox="0 0 24 24" style="stroke:#0A84FF;"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          <span>
-            <span style="color:#0A84FF; font-weight:600; display:block;">Посты из поиска про ИИ</span>
-            <span style="color:rgba(255,255,255,0.35); font-size:0.72rem; font-weight:300;">ChatGPT, Claude, Gemini, Midjourney… · 60+ ключей · многопоток 2–4 вкладки</span>
+      <div class="card" style="padding:16px; margin-bottom:6px; border: 1px solid rgba(0,89,255,0.35); background: rgba(0,89,255,0.06);">
+        <div class="toggle-row" onclick="toggle('search_ai_bulk')" style="margin-bottom: 12px; padding: 0;">
+          <span class="toggle-text has-icon active-icon-gray" id="lbl_search_ai_bulk">
+            <svg class="icon" viewBox="0 0 24 24" style="stroke:#0A84FF;"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <span>
+              <span style="color:#0A84FF; font-weight:600; display:block;">Посты из поиска про ИИ</span>
+              <span style="color:rgba(255,255,255,0.35); font-size:0.72rem; font-weight:300;">ChatGPT, Claude, Gemini, Midjourney… · 60+ ключей</span>
+            </span>
           </span>
-        </span>
-        <label class="switch" onclick="event.stopPropagation()">
-          <input type="checkbox" id="search_ai_bulk" onchange="syncUI(); document.getElementById('ai_search_hint').style.display = this.checked ? 'block' : 'none';">
-          <div class="knob"></div>
-        </label>
+          <label class="switch" onclick="event.stopPropagation()">
+            <input type="checkbox" id="search_ai_bulk" onchange="syncUI(); document.getElementById('ai_search_hint').style.display = this.checked ? 'block' : 'none'; document.getElementById('ai_bulk_settings').style.display = this.checked ? 'grid' : 'none';">
+            <div class="knob"></div>
+          </label>
+        </div>
+        <div class="input-grid" id="ai_bulk_settings" style="display:none; grid-template-columns: 1fr; border-top: 1px solid rgba(0,89,255,0.2); padding-top: 10px; margin-top: 5px;">
+           <div class="form-group" style="margin: 0;">
+              <label class="label" style="font-size: 0.75rem;"><svg class="icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Одновременных вкладок (потоков)</label>
+              <input type="number" id="ai_bulk_threads" class="input" value="3" min="1" max="10" style="border-color:rgba(0,89,255,0.2);">
+           </div>
+        </div>
       </div>
       <div id="ai_search_hint" style="display:none; margin-bottom:12px; padding:10px 14px; background:rgba(0,89,255,0.05); border-radius:10px; border:1px solid rgba(0,89,255,0.15);">
         <div style="font-size:0.7rem; color:rgba(255,255,255,0.35); line-height:1.7;">
@@ -555,7 +563,7 @@
   }
 
   const last = JSON.parse(localStorage.getItem('filpars_last_config') || '{}');
-  const fields = ['keyword','depth','top_n','explore_limit','explore_scrolls','feed_limit','feed_scrolls','min_likes'];
+  const fields = ['keyword','depth','top_n','explore_limit','explore_scrolls','feed_limit','feed_scrolls','min_likes','ai_bulk_threads'];
   const checks = ['scrape_explore','scrape_feed','search_ai_bulk','no_zero','only_ai_topics','fetch_images','fetch_reels','fetch_carousels'];
   fields.forEach(f => { if(last[f] !== undefined){ const el = document.getElementById(f); if(el) el.value = last[f]; }});
   checks.forEach(c => { if(last[c] !== undefined){ const el = document.getElementById(c); if(el) el.checked = last[c]; }});

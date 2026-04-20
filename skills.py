@@ -828,13 +828,14 @@ async def master_viral_hunter(
         log.info("[master] Step 3/4: Skipping explore by user setting.")
 
     search_ai_bulk = f_data.get("search_ai_bulk", False)
+    ai_bulk_threads = int(f_data.get("ai_bulk_threads", 3))
     if search_ai_bulk:
-        log.info("[master] Step 4/4: RUNNING BULK AI CONCURRENT SEARCH...")
+        log.info(f"[master] Step 4/4: RUNNING BULK AI CONCURRENT SEARCH ({ai_bulk_threads} threads)...")
         from interceptor import AI_KEYWORDS
         AI_SEARCH_KEYWORDS = AI_KEYWORDS
         browser = StealthBrowser()
         await browser.launch(headless=False, hidden=True)
-        sem = asyncio.Semaphore(3) # 3 concurrent tabs
+        sem = asyncio.Semaphore(ai_bulk_threads) # Dynamic concurrent tabs
         
         keywords_total = len(AI_SEARCH_KEYWORDS)
         keywords_done = 0
