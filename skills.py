@@ -284,6 +284,7 @@ async def scrape_feed(
                 log.warning("[scrape_feed] Stop request received. Exiting loop.")
                 break
             prev_count = len(state.posts)
+            prev_filtered = state.filtered_out
             try:
                 prev_dom = await page.locator(DOM_SEL).count()
             except Exception:
@@ -311,7 +312,7 @@ async def scrape_feed(
                     curr_dom = await page.locator(DOM_SEL).count()
                 except Exception:
                     curr_dom = prev_dom
-                if len(state.posts) > prev_count or curr_dom > prev_dom:
+                if len(state.posts) > prev_count or curr_dom > prev_dom or state.filtered_out > prev_filtered:
                     batch_loaded = True
                     # Give a tiny grace period for remaining items in the batch
                     await asyncio.sleep(1.5)
@@ -340,7 +341,7 @@ async def scrape_feed(
                 log.info(f"[scrape_feed] Reached max_posts ({max_posts}), stopping.")
                 break
 
-            no_new = no_new + 1 if len(state.posts) == prev_count else 0
+            no_new = no_new + 1 if len(state.posts) == prev_count and state.filtered_out == prev_filtered else 0
             if no_new >= 8 and curr_dom_final == prev_dom:
                 if not recovery_attempted:
                     log.warning("[scrape_feed] Stalled >60s. Attempting recovery (dismiss, refresh)...")
@@ -402,6 +403,7 @@ async def scrape_explore(
                 log.warning("[scrape_explore] Stop request received. Exiting loop.")
                 break
             prev_count = len(state.posts)
+            prev_filtered = state.filtered_out
             try:
                 prev_dom = await page.locator(DOM_SEL).count()
             except Exception:
@@ -428,7 +430,7 @@ async def scrape_explore(
                     curr_dom = await page.locator(DOM_SEL).count()
                 except Exception:
                     curr_dom = prev_dom
-                if len(state.posts) > prev_count or curr_dom > prev_dom:
+                if len(state.posts) > prev_count or curr_dom > prev_dom or state.filtered_out > prev_filtered:
                     batch_loaded = True
                     await asyncio.sleep(1.5)
                     break
@@ -456,7 +458,7 @@ async def scrape_explore(
                 log.info(f"[scrape_explore] Reached max_posts ({max_posts}), stopping.")
                 break
 
-            no_new = no_new + 1 if len(state.posts) == prev_count else 0
+            no_new = no_new + 1 if len(state.posts) == prev_count and state.filtered_out == prev_filtered else 0
             if no_new >= 8 and curr_dom_final == prev_dom:
                 if not recovery_attempted:
                     log.warning("[scrape_explore] Stalled >60s. Attempting recovery (dismiss, refresh)...")
@@ -521,6 +523,7 @@ async def scrape_search(
                 log.warning(f"[scrape_search:{keyword}] Stop request received. Exiting loop.")
                 break
             prev_count = len(state.posts)
+            prev_filtered = state.filtered_out
             try:
                 prev_dom = await page.locator(DOM_SEL).count()
             except Exception:
@@ -544,7 +547,7 @@ async def scrape_search(
                     curr_dom = await page.locator(DOM_SEL).count()
                 except Exception:
                     curr_dom = prev_dom
-                if len(state.posts) > prev_count or curr_dom > prev_dom:
+                if len(state.posts) > prev_count or curr_dom > prev_dom or state.filtered_out > prev_filtered:
                     batch_loaded = True
                     await asyncio.sleep(1.5)
                     break
@@ -572,7 +575,7 @@ async def scrape_search(
                 log.info(f"[scrape_search] Reached max_posts ({max_posts}), stopping.")
                 break
             
-            no_new = no_new + 1 if len(state.posts) == prev_count else 0
+            no_new = no_new + 1 if len(state.posts) == prev_count and state.filtered_out == prev_filtered else 0
             if no_new >= 6 and curr_dom_final == prev_dom:
                 if not recovery_attempted:
                     log.warning('[scrape_loop] Stalled >60s. Attempting recovery (dismiss, refresh)...')
@@ -639,6 +642,7 @@ async def scrape_search_tab(
             if stop_event and stop_event.is_set():
                 break
             prev_count = len(state.posts)
+            prev_filtered = state.filtered_out
             try: prev_dom = await page.locator(DOM_SEL).count()
             except: prev_dom = 0
 
@@ -653,7 +657,7 @@ async def scrape_search_tab(
                 await asyncio.sleep(0.8)
                 try: curr_dom = await page.locator(DOM_SEL).count()
                 except: curr_dom = prev_dom
-                if len(state.posts) > prev_count or curr_dom > prev_dom:
+                if len(state.posts) > prev_count or curr_dom > prev_dom or state.filtered_out > prev_filtered:
                     batch_loaded = True
                     await asyncio.sleep(1.0)
                     break
@@ -670,7 +674,7 @@ async def scrape_search_tab(
             if len(state.posts) >= max_posts:
                 break
                 
-            no_new = no_new + 1 if len(state.posts) == prev_count else 0
+            no_new = no_new + 1 if len(state.posts) == prev_count and state.filtered_out == prev_filtered else 0
             if no_new >= 4 and curr_dom_final == prev_dom:
                 if not recovery_attempted:
                     log.warning('[scrape_loop] Stalled >60s. Attempting recovery (dismiss, refresh)...')
