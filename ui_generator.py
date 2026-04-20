@@ -1380,7 +1380,7 @@ function resetFilters() {{
 </body>
 </html>"""
 
-    with open(output_path, "w", encoding="utf-8-sig") as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         f.write(page_html)
 
     print(f"[ui_generator] HTML report saved: {output_path}")

@@ -57,10 +57,9 @@ HIGH_SIGNAL_SINGLE = {
     # EN — very specific to AI space
     "midjourney", "stablediffusion", "comfyui", "llm", "llms", "rag", "finetuning",
     "fine-tuning", "tokenize", "embeddings", "inference", "openai", "anthropic",
-    "deepseek", "multimodal", "diffusion", "transformer", "langchain", "autogpt",
-    "copilot", "gpt4", "gpt-4", "gpt3", "gpt-3", "claude3", "claude-3",
-    "gemini", "sora", "dall-e", "dalle", "runway", "pika", "kling", "heygen",
-    "elevenlabs", "synthesia", "suno", "udio", "windsurf", "cursor",
+    "deepseek", "multimodal", "diffusion", "langchain", "autogpt",
+    "gpt4", "gpt-4", "gpt3", "gpt-3", "claude3", "claude-3",
+    "dall-e", "dalle", "heygen", "elevenlabs", "synthesia", "suno", "udio",
     "vibe-coding", "vibecoding",
     # RU
     "нейросетью", "нейросети", "нейронку", "нейронкой", "промпт", "промптинг",
