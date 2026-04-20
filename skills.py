@@ -328,34 +328,7 @@ async def scrape_feed(
             if not batch_loaded:
                 log.info(f"[scrape_feed] No new content after 20s. Will try one more scroll.")
 
-            # ── Occasional human post-open simulation ──
-            if batch_loaded and random.random() < 0.4:
-                try:
-                    posts_loc = await page.locator(DOM_SEL).all()
-                    if posts_loc:
-                        pool = posts_loc[-10:]
-                        posts_to_open = random.sample(pool, min(len(pool), random.randint(1, 3)))
-                        for p_el in posts_to_open:
-                            log.debug("[Human] Opening random post from Feed...")
-                            await p_el.click()
-                            await browser.human_delay(2, 5)
-                            await page.keyboard.press("Escape")
-                            await asyncio.sleep(0.5)
-                            try:
-                                await page.evaluate("""() => {
-                                    const svg = document.querySelector('svg[aria-label="Close"], svg[aria-label="Закрыть"]');
-                                    if(svg) {
-                                        const btn = svg.closest('[role="button"], button, a');
-                                        if(btn) btn.click();
-                                    }
-                                }""")
-                            except: pass
-                            
-                            await asyncio.sleep(0.5)
-                            await page.keyboard.press("Escape")
-                            await asyncio.sleep(1)
-                except Exception:
-                    pass
+
 
             if random.random() < 0.3:
                 await browser.human_move_mouse(page)
@@ -471,33 +444,7 @@ async def scrape_explore(
             if not batch_loaded:
                 log.info(f"[scrape_explore] No new content after 20s, will retry scroll.")
 
-            if batch_loaded and random.random() < 0.4:
-                try:
-                    posts_loc = await page.locator(DOM_SEL).all()
-                    if posts_loc:
-                        pool = posts_loc[-10:]
-                        posts_to_open = random.sample(pool, min(len(pool), random.randint(1, 3)))
-                        for p_el in posts_to_open:
-                            log.debug("[Human] Opening random post from Explore...")
-                            await p_el.click()
-                            await browser.human_delay(2, 5)
-                            await page.keyboard.press("Escape")
-                            await asyncio.sleep(0.5)
-                            try:
-                                await page.evaluate("""() => {
-                                    const svg = document.querySelector('svg[aria-label="Close"], svg[aria-label="Закрыть"]');
-                                    if(svg) {
-                                        const btn = svg.closest('[role="button"], button, a');
-                                        if(btn) btn.click();
-                                    }
-                                }""")
-                            except: pass
-                            
-                            await asyncio.sleep(0.5)
-                            await page.keyboard.press("Escape")
-                            await asyncio.sleep(1)
-                except Exception:
-                    pass
+
 
             if random.random() < 0.25:
                 await browser.human_move_mouse(page)
@@ -613,33 +560,7 @@ async def scrape_search(
             if not batch_loaded:
                 log.info(f"[scrape_search] No new content after 20s, retrying...")
 
-            if batch_loaded and random.random() < 0.4:
-                try:
-                    posts_loc = await page.locator(DOM_SEL).all()
-                    if posts_loc:
-                        pool = posts_loc[-10:]
-                        posts_to_open = random.sample(pool, min(len(pool), random.randint(1, 3)))
-                        for p_el in posts_to_open:
-                            log.debug(f"[Human] Opening random search post for '{keyword}'...")
-                            await p_el.click()
-                            await browser.human_delay(2, 5)
-                            await page.keyboard.press("Escape")
-                            await asyncio.sleep(0.5)
-                            try:
-                                await page.evaluate("""() => {
-                                    const svg = document.querySelector('svg[aria-label="Close"], svg[aria-label="Закрыть"]');
-                                    if(svg) {
-                                        const btn = svg.closest('[role="button"], button, a');
-                                        if(btn) btn.click();
-                                    }
-                                }""")
-                            except: pass
-                            
-                            await asyncio.sleep(0.5)
-                            await page.keyboard.press("Escape")
-                            await asyncio.sleep(1)
-                except Exception:
-                    pass
+
 
             if random.random() < 0.2:
                 await browser.human_move_mouse(page)
@@ -740,29 +661,7 @@ async def scrape_search_tab(
             try: curr_dom_final = await page.locator(DOM_SEL).count()
             except: curr_dom_final = 0
 
-            if batch_loaded and random.random() < 0.2:
-                try:
-                    posts_loc = await page.locator(DOM_SEL).all()
-                    if posts_loc:
-                        p_el = random.choice(posts_loc[-5:])
-                        await p_el.click()
-                        await browser.human_delay(1.5, 3)
-                        await page.keyboard.press("Escape")
-                        await asyncio.sleep(0.5)
-                        try:
-                            await page.evaluate("""() => {
-                                const svg = document.querySelector('svg[aria-label="Close"], svg[aria-label="Закрыть"]');
-                                if(svg) {
-                                    const btn = svg.closest('[role="button"], button, a');
-                                    if(btn) btn.click();
-                                }
-                            }""")
-                        except: pass
-                        
-                        await asyncio.sleep(0.5)
-                        await page.keyboard.press("Escape")
-                        await asyncio.sleep(0.5)
-                except: pass
+
 
             if await browser.check_challenge(page):
                 log.warning(f"[scrape_search_tab] Hit challenge on '{keyword}'")
