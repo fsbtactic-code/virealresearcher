@@ -277,6 +277,7 @@ async def scrape_feed(
         await browser.human_delay(3, 5)
 
         max_scrolls, no_new = scrolls_limit, 0
+        recovery_attempted = False
         DOM_SEL = "article, a[href*='/p/']"
         for i in range(max_scrolls):
             if stop_event and stop_event.is_set():
@@ -355,8 +356,20 @@ async def scrape_feed(
 
             no_new = no_new + 1 if len(state.posts) == prev_count else 0
             if no_new >= 8 and curr_dom_final == prev_dom:
-                log.warning(f"[scrape_feed] 8 consecutive scrolls with no new content. Stopping.")
-                break
+                if not recovery_attempted:
+                    log.warning("[scrape_feed] Stalled >60s. Attempting recovery (dismiss, refresh)...")
+                    await dismiss_instagram_modals(page)
+                    await page.evaluate("window.scrollTo(0, 0)")
+                    await asyncio.sleep(2)
+                    try: await page.reload(timeout=30000)
+                    except: pass
+                    await browser.human_delay(3, 5)
+                    recovery_attempted = True
+                    no_new = 0
+                    continue
+                else:
+                    log.warning(f"[scrape_feed] 8 consecutive scrolls with no new content. Stopping.")
+                    break
             if (i + 1) % 20 == 0:
                 _save_progress(state.posts, "feed")
     except Exception as exc:
@@ -396,6 +409,7 @@ async def scrape_explore(
         await browser.human_delay(3, 5)
 
         max_scrolls, no_new = scrolls_limit, 0
+        recovery_attempted = False
         DOM_SEL = "article, div[style*='grid-template-columns'] a"
         for i in range(max_scrolls):
             if stop_event and stop_event.is_set():
@@ -471,8 +485,20 @@ async def scrape_explore(
 
             no_new = no_new + 1 if len(state.posts) == prev_count else 0
             if no_new >= 8 and curr_dom_final == prev_dom:
-                log.warning(f"[scrape_explore] 8 consecutive scrolls with no new content. Stopping.")
-                break
+                if not recovery_attempted:
+                    log.warning("[scrape_explore] Stalled >60s. Attempting recovery (dismiss, refresh)...")
+                    await dismiss_instagram_modals(page)
+                    await page.evaluate("window.scrollTo(0, 0)")
+                    await asyncio.sleep(2)
+                    try: await page.reload(timeout=30000)
+                    except: pass
+                    await browser.human_delay(3, 5)
+                    recovery_attempted = True
+                    no_new = 0
+                    continue
+                else:
+                    log.warning(f"[scrape_explore] 8 consecutive scrolls with no new content. Stopping.")
+                    break
             if (i + 1) % 15 == 0:
                 _save_progress(state.posts, "explore")
     except Exception as exc:
@@ -515,6 +541,7 @@ async def scrape_search(
         await browser.human_delay(3, 5)
 
         max_scrolls, no_new = scrolls_limit, 0
+        recovery_attempted = False
         DOM_SEL = "a[href*='/p/'], a[href*='/reel/']"
         for i in range(max_scrolls):
             if stop_event and stop_event.is_set():
@@ -587,8 +614,20 @@ async def scrape_search(
             
             no_new = no_new + 1 if len(state.posts) == prev_count else 0
             if no_new >= 6 and curr_dom_final == prev_dom:
-                log.warning(f"[scrape_search] 6 scrolls with no new posts. Stopping.")
-                break
+                if not recovery_attempted:
+                    log.warning('[scrape_loop] Stalled >60s. Attempting recovery (dismiss, refresh)...')
+                    await dismiss_instagram_modals(page)
+                    await page.evaluate('window.scrollTo(0, 0)')
+                    await asyncio.sleep(2)
+                    try: await page.reload(timeout=30000)
+                    except: pass
+                    await browser.human_delay(3, 5)
+                    recovery_attempted = True
+                    no_new = 0
+                    continue
+                else:
+                    log.warning(f"[scrape_search] 6 scrolls with no new posts. Stopping.")
+                    break
             log.debug(f"[search:{keyword}] no_new={no_new}, posts={len(state.posts)}")
     except Exception as exc:
         log.error(f"[scrape_search] Error: {exc}")
@@ -633,6 +672,7 @@ async def scrape_search_tab(
 
         max_scrolls = scrolls_limit
         no_new = 0
+        recovery_attempted = False
         DOM_SEL = "a[href*='/p/'], a[href*='/reel/']"
         
         for i in range(max_scrolls):
@@ -681,7 +721,19 @@ async def scrape_search_tab(
                 
             no_new = no_new + 1 if len(state.posts) == prev_count else 0
             if no_new >= 4 and curr_dom_final == prev_dom:
-                break
+                if not recovery_attempted:
+                    log.warning('[scrape_loop] Stalled >60s. Attempting recovery (dismiss, refresh)...')
+                    await dismiss_instagram_modals(page)
+                    await page.evaluate('window.scrollTo(0, 0)')
+                    await asyncio.sleep(2)
+                    try: await page.reload(timeout=30000)
+                    except: pass
+                    await browser.human_delay(3, 5)
+                    recovery_attempted = True
+                    no_new = 0
+                    continue
+                else:
+                    break
                 
     except Exception as exc:
         log.error(f"[scrape_search_tab] Error '{keyword}': {exc}")
