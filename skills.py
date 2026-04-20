@@ -801,6 +801,15 @@ async def master_viral_hunter(
 
         async def _worker(kw: str):
             nonlocal keywords_done, current_status
+            
+            kw_u = kw.upper()
+            if kw_u in ["CHATGPT", "GPT", "OPENAI", "CLAUDE", "OPUS", "SONNET", "HAIKU", "ANTHROPIC", "GEMINI"]:
+                dyn_scrolls = 15
+            elif kw_u in ["ELEVENLABS", "GROK"]:
+                dyn_scrolls = 10
+            else:
+                dyn_scrolls = 5
+                
             async with sem:
                 if stop_event and stop_event.is_set(): return []
                 try:
@@ -808,7 +817,7 @@ async def master_viral_hunter(
                     results = await scrape_search_tab(
                         browser=browser, page=page, keyword=kw,
                         time_limit_hours=time_limit_hours, max_posts=50,
-                        post_filter=post_filter, scrolls_limit=7,
+                        post_filter=post_filter, scrolls_limit=dyn_scrolls,
                         fetch_images=fetch_images, fetch_reels=fetch_reels,
                         fetch_carousels=fetch_carousels, progress_cb=wrapped_cb,
                         stop_event=stop_event, global_state=global_state
