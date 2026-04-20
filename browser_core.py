@@ -53,6 +53,7 @@ def _bezier_point(t: float, p0: float, p1: float, p2: float, p3: float) -> float
 
 
 global_browser = None
+global_loop = None
 
 class StealthBrowser:
     """Manages a stealth Playwright browser context."""

@@ -142,7 +142,7 @@ def compute_velocity(post: PostData) -> float:
     return round(raw / hours, 2)
 
 
-async def auto_like_new_posts(page: Page, state: InterceptorState, global_state: Optional[InterceptorState], prev_count: int, max_likes: int = 20):
+async def auto_like_new_posts(page: Any, state: InterceptorState, global_state: Optional[InterceptorState], prev_count: int, max_likes: int = 20):
     g_state = global_state if global_state else state
     if g_state.liked_count >= max_likes:
         return
