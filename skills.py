@@ -810,6 +810,14 @@ async def master_viral_hunter(
             else:
                 dyn_scrolls = 5
                 
+            # Disable extra AI topic text filtering since the search kw itself guarantees it's an AI post
+            local_filter = PostFilter(
+                min_likes=post_filter.min_likes,
+                exclude_zero_engagement=post_filter.exclude_zero_engagement,
+                max_age_hours=post_filter.max_age_hours,
+                only_ai_topics=False
+            )
+            
             async with sem:
                 if stop_event and stop_event.is_set(): return []
                 try:
@@ -817,7 +825,7 @@ async def master_viral_hunter(
                     results = await scrape_search_tab(
                         browser=browser, page=page, keyword=kw,
                         time_limit_hours=time_limit_hours, max_posts=50,
-                        post_filter=post_filter, scrolls_limit=dyn_scrolls,
+                        post_filter=local_filter, scrolls_limit=dyn_scrolls,
                         fetch_images=fetch_images, fetch_reels=fetch_reels,
                         fetch_carousels=fetch_carousels, progress_cb=wrapped_cb,
                         stop_event=stop_event, global_state=global_state
