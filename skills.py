@@ -345,7 +345,6 @@ async def scrape_feed(
 
             # ── Dismiss any modal pop-ups before scrolling ──
             await dismiss_instagram_modals(page)
-            await auto_like_new_posts(page, state, global_state, prev_count, max_likes=20)
 
             # ── Scroll to the absolute bottom so IG's IntersectionObserver fires ──
             await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
@@ -387,6 +386,7 @@ async def scrape_feed(
 
             if random.random() < 0.3:
                 await browser.human_move_mouse(page)
+            await auto_like_new_posts(page, state, global_state, prev_count, max_likes=20)
             if await browser.check_challenge(page):
                 await browser.handle_challenge([asdict(p) for p in state.posts])
                 break
@@ -465,7 +465,6 @@ async def scrape_explore(
 
             # ── Dismiss any modal pop-ups before scrolling ──
             await dismiss_instagram_modals(page)
-            await auto_like_new_posts(page, state, global_state, prev_count, max_likes=20)
 
             # ── True bottom scroll — triggers IG's infinite-scroll loader ──
             await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
@@ -505,6 +504,7 @@ async def scrape_explore(
 
             if random.random() < 0.25:
                 await browser.human_move_mouse(page)
+            await auto_like_new_posts(page, state, global_state, prev_count, max_likes=20)
             if await browser.check_challenge(page):
                 await browser.handle_challenge([asdict(p) for p in state.posts])
                 break
@@ -585,7 +585,6 @@ async def scrape_search(
                 prev_dom = 0
 
             # ── Optimize Exploration ──
-            await auto_like_new_posts(page, state, global_state, prev_count, max_likes=20)
 
             # ── Scroll to true bottom so IG's sentinel enters viewport ──
             await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
@@ -625,6 +624,7 @@ async def scrape_search(
 
             if random.random() < 0.2:
                 await browser.human_move_mouse(page)
+            await auto_like_new_posts(page, state, global_state, prev_count, max_likes=20)
             if await browser.check_challenge(page):
                 log.warning("[scrape_search] Hit captcha/challenge, breaking loop.")
                 await browser.handle_challenge([asdict(p) for p in state.posts])
@@ -705,7 +705,6 @@ async def scrape_search_tab(
             except: prev_dom = 0
 
             await dismiss_instagram_modals(page)
-            await auto_like_new_posts(page, state, global_state, prev_count, max_likes=20)
             await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
             await asyncio.sleep(random.uniform(0.6, 1.2))
             await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
@@ -727,6 +726,7 @@ async def scrape_search_tab(
 
 
 
+            await auto_like_new_posts(page, state, global_state, prev_count, max_likes=20)
             if await browser.check_challenge(page):
                 log.warning(f"[scrape_search_tab] Hit challenge on '{keyword}'")
                 break
