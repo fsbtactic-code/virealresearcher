@@ -34,25 +34,26 @@
     <text x="350.0" y="153.0" class="sub-text">Ожидание новых постов 15 сек</text>
     <line x1="350" y1="170" x2="350" y2="220" class="arrow" marker-end="url(#arrowhead)"/>
     <rect x="250" y="220" width="200" height="70" fill="url(#gPurple)" class="rect-box" />
-    <text x="350.0" y="253.0" class="box-text">Проверка (no_new >= 4-8)</text>
+    <text x="350.0" y="253.0" class="box-text">Проверка (no_new &gt;= 4)</text>
     <text x="350.0" y="273.0" class="sub-text">Появился ли новый контент?</text>
-    <line x1="450" y1="255" x2="550" y2="255" class="arrow" marker-end="url(#arrowhead)"/><text x="500" y="245" class="sub-text">Если ДА</text>
+    <line x1="450" y1="255" x2="550" y2="255" class="arrow" marker-end="url(#arrowhead)"/>
+    <text x="500" y="245" class="sub-text">Если ДА</text>
     <rect x="550" y="220" width="150" height="70" fill="url(#gGreen)" class="rect-box" />
     <text x="625.0" y="253.0" class="box-text">Продолжаем</text>
     <text x="625.0" y="273.0" class="sub-text">Обнуляем счетчик</text>
-    <line x1="350" y1="290" x2="350" y2="350" class="arrow" marker-end="url(#arrowhead)"/><text x="385" y="325" class="sub-text">Если НЕТ (>60 сек)</text>
+    <line x1="350" y1="290" x2="350" y2="350" class="arrow" marker-end="url(#arrowhead)"/>
+    <text x="385" y="325" class="sub-text">Если НЕТ (&gt;60 сек)</text>
     <rect x="250" y="350" width="200" height="90" fill="url(#gRed)" class="rect-box" />
     <text x="350.0" y="393.0" class="box-text">РЕЖИМ СПАСЕНИЯ</text>
-    <text x="350.0" y="413.0" class="sub-text">1. Закрыть баннеры/модалки
-2. Скролл наверх
-3. Перезагрузка страницы</text>
+    <text x="350.0" y="413.0" class="sub-text">1. Закрыть баннеры/модалки</text>
+    <text x="350.0" y="433.0" class="sub-text">2. Обновить страницу</text>
     <line x1="350" y1="440" x2="350" y2="490" class="arrow" marker-end="url(#arrowhead)"/>
     <rect x="250" y="490" width="200" height="70" fill="url(#gPurple)" class="rect-box" />
     <text x="350.0" y="523.0" class="box-text">Финальная Попытка</text>
-    <text x="350.0" y="543.0" class="sub-text">Еще один шанс 60 сек</text>
-    <line x1="450" y1="525" x2="550" y2="525" class="arrow" marker-end="url(#arrowhead)"/><text x="500" y="515" class="sub-text">Всё равно пусто</text>
+    <text x="350.0" y="543.0" class="sub-text">Еще один шанс</text>
+    <line x1="450" y1="525" x2="550" y2="525" class="arrow" marker-end="url(#arrowhead)"/>
+    <text x="500" y="515" class="sub-text">Всё равно пусто</text>
     <rect x="550" y="490" width="150" height="70" fill="url(#gRed)" class="rect-box" />
-    <text x="625.0" y="523.0" class="box-text">СТОП / СЛЕД. СЛОВО</text>
+    <text x="625.0" y="523.0" class="box-text">СТОП / ДАЛЬШЕ</text>
     <text x="625.0" y="543.0" class="sub-text">Лимит исчерпан</text>
-    
 </svg>

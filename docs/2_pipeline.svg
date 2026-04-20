@@ -35,18 +35,17 @@
     <line x1="350" y1="170" x2="350" y2="220" class="arrow" marker-end="url(#arrowhead)"/>
     <rect x="250" y="220" width="200" height="70" fill="url(#gBlue)" class="rect-box" />
     <text x="350.0" y="253.0" class="box-text">ШАГ 2: Моя Лента</text>
-    <text x="350.0" y="273.0" class="sub-text">scrape_feed() -> Сбор ленты</text>
+    <text x="350.0" y="273.0" class="sub-text">scrape_feed() -&gt; Сбор ленты</text>
     <line x1="350" y1="290" x2="350" y2="340" class="arrow" marker-end="url(#arrowhead)"/>
     <rect x="250" y="340" width="200" height="70" fill="url(#gBlue)" class="rect-box" />
     <text x="350.0" y="373.0" class="box-text">ШАГ 3: Интересное</text>
-    <text x="350.0" y="393.0" class="sub-text">scrape_explore() -> Рекомендации</text>
+    <text x="350.0" y="393.0" class="sub-text">scrape_explore() -&gt; Рекомендации</text>
     <line x1="350" y1="410" x2="350" y2="460" class="arrow" marker-end="url(#arrowhead)"/>
     <rect x="250" y="460" width="200" height="80" fill="url(#gGreen)" class="rect-box" />
     <text x="350.0" y="498.0" class="box-text">ШАГ 4: Турбо AI Поиск</text>
-    <text x="350.0" y="518.0" class="sub-text">Многопоток по 117 ИИ-словам (3 вкладки)</text>
+    <text x="350.0" y="518.0" class="sub-text">Многопоток по 117 ИИ-словам</text>
     <line x1="350" y1="540" x2="350" y2="590" class="arrow" marker-end="url(#arrowhead)"/>
     <rect x="250" y="590" width="200" height="70" fill="url(#gRed)" class="rect-box" />
     <text x="350.0" y="623.0" class="box-text">ШАГ 5: Очистка</text>
-    <text x="350.0" y="643.0" class="sub-text">Удаление дубликатов, Фильтр 0 охвата</text>
-    
+    <text x="350.0" y="643.0" class="sub-text">Удаление дубликатов, нулей</text>
 </svg>
