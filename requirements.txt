@@ -3,6 +3,7 @@ playwright-stealth>=1.0.6
 pywebview>=5.0
 pydantic>=2.0.0
 mcp
+sentence-transformers>=2.2.0  # AI semantic topic classifier (optional but recommended)
 # macOS WebView support
 pyobjc-framework-WebKit; sys_platform == 'darwin'
 pyobjc-core; sys_platform == 'darwin'
