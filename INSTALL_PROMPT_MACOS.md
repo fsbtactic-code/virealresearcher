@@ -1,40 +1,56 @@
 # Железобетонная Установка: macOS (Apple Silicon / Intel)
 
-Скопируйте скрипт настройки ниже и вставьте в Terminal.app или iTerm2.
+Вставьте скрипт в **Terminal.app** или **iTerm2**.
 
-## Автоматическая настройка (Bash / ZSH)
+## Автоматическая установка
 
 ```bash
-# 1. Установка базовых инструментов Xcode (если не установлены)
+# 1. Установка инструментов Xcode (если не установлены)
 xcode-select --install || true
 
-# 2. Скачивание репозитория 
+# 2. Клонировать репозиторий
 git clone https://github.com/fsbtactic-code/virealresearcher.git
 cd virealresearcher
 
-# 3. Создание виртуального окружения
+# 3. Создать виртуальное окружение
 python3 -m venv .venv
 source .venv/bin/activate
 
-# 4. Установка ядра и PyObjC (критично для pywebview на Mac)
-pip install pyobjc-framework-WebKit pyobjc-core
+# 4. Установить все зависимости (pywebview, playwright, sentence-transformers и др.)
 pip install -r requirements.txt
 
-# 5. Установка браузеров Playwright
-playwright install chromium
-
-# 6. Запуск сервера и интерфейса
+# 5. Финальная настройка (Playwright Chromium + проверка импортов)
 python3 install_all.py
+
+# 6. Авторизация Instagram (один раз — сохраняет сессию)
+python3 auth.py
+
+# 7. Запуск парсера
 python3 run_scraper.py
 ```
 
-### Настройка Claude Code (Опционально)
-Если вы используете `Сlaude Code`, находясь в директории `virealresearcher`, введите команду:
+> ⚠️ **Шаг 6 обязателен перед первым запуском.** Откроется браузер — войдите в Instagram вручную. После закрытия браузера сессия сохранится автоматически.
+
+## Настройка Claude Code (опционально)
+
+Если используете **Claude Code**, находясь в папке `virealresearcher`:
+
 ```bash
 /banana-install
 ```
-Claude Code сам произведет инъекцию MCP-сервера в `~/.claude.json`.
-Для запусков парсера из любой точки в системе:
+
+Claude Code сам выполнит установку и зарегистрирует MCP. Для запуска парсера из любого места:
+
 ```bash
 /banana-run
 ```
+
+## Если что-то пошло не так
+
+| Ошибка | Решение |
+|--------|---------|
+| `storage_state.json not found` | Запустите `python3 auth.py` |
+| `playwright` ошибки | `python3 -m playwright install chromium` |
+| WebView не открывается | `pip install pyobjc-framework-WebKit pyobjc-core` |
+| Медленная загрузка AI-модели | Первый запуск — модель (~118 МБ) скачается один раз |
+| Модуль не найден | `pip install -r requirements.txt` |

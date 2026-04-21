@@ -160,6 +160,14 @@ def verify_imports():
             log_err(f"{name} — {e}")
             all_ok = False
 
+    # Optional: sentence-transformers for AI semantic classification
+    try:
+        import sentence_transformers  # noqa: F401
+        log_ok(f"sentence-transformers {sentence_transformers.__version__} (AI классификатор)")
+    except ImportError:
+        log_warn("sentence-transformers не найден — ИИ-фильтрация будет недоступна")
+        log_warn("Установить: pip install sentence-transformers")
+
     # macOS-specific: check pyobjc
     if sys.platform == "darwin":
         try:
