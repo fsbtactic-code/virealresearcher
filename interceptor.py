@@ -30,6 +30,10 @@ class PostFilter:
     exclude_zero_engagement: bool = False  # skip posts with 0 likes AND 0 comments
     filter_keywords: list[str] = field(default_factory=list)
     only_ru_en: bool = False
+    # AI semantic classifier fields (optional, requires sentence-transformers)
+    ai_topic_text: str = ""      # free-text topic description for semantic matching
+    ai_enabled: bool = False     # toggle: True = use AI when keyword match fails
+    ai_threshold: float = 0.35   # cosine similarity threshold (0.0–1.0)
 
     def matches(self, post: "PostData") -> bool:
         """Return True if the post passes all filter criteria."""
@@ -79,7 +83,25 @@ class PostFilter:
                     break
                     
             if not match_found:
-                return False
+                # ── AI semantic fallback ──────────────────────────────────
+                # Keyword check failed. If AI recognition is enabled and
+                # the model is ready, try semantic similarity as a second
+                # chance before discarding the post.
+                if self.ai_enabled and self.ai_topic_text:
+                    try:
+                        from ai_classifier import classifier  # lazy import
+                        ai_result = classifier.classify(all_text, threshold=self.ai_threshold)
+                        if ai_result is True:
+                            log.debug("[PostFilter] AI rescued post (keyword miss, semantic hit)")
+                            # do NOT return yet — let remaining filters run
+                        elif ai_result is False:
+                            return False  # AI also says off-topic
+                        # ai_result is None → bypass, continue normally
+                    except Exception as _ai_err:
+                        log.debug(f"[PostFilter] AI classifier error (bypass): {_ai_err}")
+                else:
+                    return False
+                # ─────────────────────────────────────────────────────────
 
         # Advanced Language detection filter (RU/EN precision)
         if self.only_ru_en and getattr(post, 'caption_text', ''):

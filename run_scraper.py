@@ -59,6 +59,15 @@ except ImportError as e:
     log.critical(f"[ ERROR ] Не удалось импортировать web_launcher: {e}")
     sys.exit(1)
 
+# ── AI Classifier (optional dependency) ──
+try:
+    from ai_classifier import classifier as _ai_classifier, warm_up_in_background as _ai_warmup
+    log.info("[ OK ] ai_classifier.py импортирован")
+except ImportError:
+    _ai_classifier = None
+    _ai_warmup = None
+    log.warning("[ WARN ] ai_classifier.py не найден — AI-режим недоступен")
+
 # ── Terminal helpers ──
 def _c(code: str, text: str) -> str:
     return f"\033[{code}m{text}\033[0m"
@@ -112,6 +121,18 @@ class WebWorkerApi:
 
     def getAuthStatus(self):
         return check_session()
+
+    def getAiStatus(self):
+        """JS → Python: returns AI classifier status string for UI indicator."""
+        if _ai_classifier is None:
+            return "unavailable"
+        return _ai_classifier.get_status()
+
+    def getAiStatusText(self):
+        """JS → Python: returns Russian UI status string."""
+        if _ai_classifier is None:
+            return "AI недоступен"
+        return _ai_classifier.get_status_text()
 
     def startAuth(self):
         import subprocess
@@ -220,6 +241,10 @@ class WebWorkerApi:
             "enable_deep_search":     gui_data.get("deep_search", False),
             "filter_keywords_raw":    gui_data.get("filter_keywords", ""),
             "only_ru_en":             gui_data.get("only_ru_en", False),
+            # AI semantic classification
+            "ai_topic_text":          gui_data.get("filter_keywords", ""),  # reuse topic field
+            "ai_enabled":             gui_data.get("ai_recognition", False),
+            "ai_threshold":           0.35,
         }
 
         log.info(f"📋 Настройки: keyword={settings['seed_keyword']}, depth={settings['time_limit_hours']}h")

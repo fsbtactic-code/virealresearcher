@@ -902,14 +902,28 @@ async def master_viral_hunter(
     filter_keywords_raw = f_data.get("filter_keywords_raw", "")
     filter_keywords = [k.strip() for k in filter_keywords_raw.split(",") if k.strip()]
     only_ru_en = f_data.get("only_ru_en", False)
+    ai_topic_text = f_data.get("ai_topic_text", "")
+    ai_enabled = f_data.get("ai_enabled", False)
+    ai_threshold = float(f_data.get("ai_threshold", 0.35))
     post_filter = PostFilter(
         min_likes=min_likes_val,
         exclude_zero_engagement=excl_zero,
         max_age_hours=time_limit_hours,
         filter_keywords=filter_keywords,
-        only_ru_en=only_ru_en
+        only_ru_en=only_ru_en,
+        ai_topic_text=ai_topic_text,
+        ai_enabled=ai_enabled,
+        ai_threshold=ai_threshold,
     )
-    log.info(f"[master] PostFilter: min_likes={min_likes_val}, excl_zero={excl_zero}, max_age={time_limit_hours}h, filters={filter_keywords}, only_ru_en={only_ru_en}")
+    log.info(f"[master] PostFilter: min_likes={min_likes_val}, excl_zero={excl_zero}, max_age={time_limit_hours}h, filters={filter_keywords}, only_ru_en={only_ru_en}, ai_enabled={ai_enabled}")
+
+    # ── Start AI classifier warm-up in background (non-blocking) ──
+    if ai_enabled and ai_topic_text:
+        try:
+            from ai_classifier import warm_up_in_background
+            warm_up_in_background(ai_topic_text)
+        except Exception as _e:
+            log.warning(f"[master] AI warm_up skipped: {_e}")
 
     all_posts: list[dict] = []
     
