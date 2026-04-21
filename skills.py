@@ -114,12 +114,22 @@ async def safe_goto(page, url: str, retries: int = 3, timeout: int = 45000):
                     timeout=timeout
                 )
                 log.info(f"[ OK ] DOM content detected.")
+                
+                # Check for stealth auth wall / login screen
+                if "login" in page.url.lower():
+                    raise PermissionError("Авторизация истекла (cookie устарели). Запустите команду /banana-auth")
+                    
                 return True
-            except Exception:
+            except Exception as e:
+                # Propagate PermissionError to stop retries on auth failure
+                if isinstance(e, PermissionError):
+                    raise
                 raise Exception("Functional selectors did not appear in time.")
 
         except Exception as exc:
             log.warning(f"Attempt {attempt+1} failed for {url}: {exc}")
+            if isinstance(exc, PermissionError):
+                raise
             if attempt < retries - 1:
                 await asyncio.sleep(random.uniform(5, 10))
             else:

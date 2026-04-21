@@ -325,7 +325,7 @@ class WebWorkerApi:
                 if w:
                     safe_msg = str(e).replace("'", "\\'").replace('"', '\\"')[:200]
                     try:
-                        w.evaluate_js(f"window.alert('Ошибка парсинга: {safe_msg}')")
+                        w.evaluate_js(f"window.alert('Упс! Ошибка парсинга: {safe_msg}'); window.location.reload();")
                     except Exception:
                         pass
 
