@@ -235,14 +235,19 @@ def _detect_post_type(node: dict) -> str:
     if media_type == 8:
         return "carousel"
     if media_type == 2:
-        # media_type=2 is video. Reels have video-specific indicators.
-        if node.get("video_duration") or node.get("has_audio") or node.get("ig_play_count"):
-            return "reel"
-        return "video"
+        # media_type=2 is always video — all short-form vertical video is a Reel.
+        # Some nodes lack product_type='clips' but are still Reels (Search API quirk).
+        # Check for any Reel-specific signals first, then default to reel.
+        if node.get("carousel_media_count", 0) > 0 or typename in ("GraphSidecar", "XDTGraphSidecar"):
+            return "carousel"  # rare: carousels with video cover
+        return "reel"  # media_type=2 → video → treat as Reel by default
     if media_type == 1:
         return "image"
     if typename == "GraphVideo" or node.get("is_video"):
         return "reel"  # GraphVideo in timeline feed is always a Reel
+    # Fallback: if node has play_count/video_duration it's a video/Reel
+    if node.get("play_count") or node.get("video_view_count") or node.get("video_duration"):
+        return "reel"
     return "image"
 
 
@@ -319,7 +324,7 @@ def _extract_post(node: dict, source: str = "") -> Optional[PostData]:
         if not thumb:
             thumb = node.get("display_url", "")
 
-        is_reel = post_type == "reel"
+        is_reel = post_type in ("reel", "video")  # 'video' is also a Reel (media_type=2 fallback)
         is_carousel = post_type == "carousel"
         carousel_count = _safe_int(
             node.get("carousel_media_count")
