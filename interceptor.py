@@ -101,22 +101,36 @@ class PostFilter:
         if self.min_followers > 0 and post.owner_followers < self.min_followers:
             return False
             
-        # IA filter: strict keyword match + optional smart context detection
+        # AI filter: strict keyword match + optional smart context detection
         if self.only_ai_topics:
-            all_text = (post.caption_text or "") + (getattr(post, 'alt_text', '') or "") + (getattr(post, 'subtitles_text', '') or "")
-            # Strip emojis, punctuation, urls and whitespace — count only real words
+            caption = post.caption_text or ""
+            alt = getattr(post, 'alt_text', '') or ""
+            subs = getattr(post, 'subtitles_text', '') or ""
+            subs_uri = getattr(post, 'subtitles_uri', '') or ""
+            all_text = caption + alt + subs
+
+            # Strip emojis, punctuation, urls — count only real words
             meaningful = re.sub(r'#\w+|@\w+|https?://\S+|[^\w\sа-яА-ЯёЁa-zA-Z]', '', all_text).strip()
+
             if not meaningful:
-                # No text signal — defer to subtitle batch fetch (not pass-through, not discard)
-                return None  # add_post() will put in state.pending
-            elif text_has_ai_topics(post.caption_text):
-                pass  # keyword match succeeded
+                # No text signal at all.
+                # If there's a subtitles_uri we can fetch later → defer (pending).
+                # If it's a Reel/video with no subs URI (common in feed/explore) → pass through:
+                #   Instagram already filtered these posts to the user's feed, so they're likely on-topic.
+                if subs_uri:
+                    return None  # add_post() will queue for subtitle fetch
+                elif post.is_reel or getattr(post, 'post_type', '') in ('reel', 'video'):
+                    pass  # Reel with no text and no subtitles URI → pass through
+                else:
+                    return None  # non-video with no text → defer/discard
+            elif text_has_ai_topics(all_text):
+                pass  # keyword match in caption OR alt OR subtitles
             elif self.ai_context_detection:
                 from ai_detector import is_ai_content
                 if not is_ai_content(
-                    caption=post.caption_text,
-                    alt_text=getattr(post, 'alt_text', ''),
-                    subtitles=getattr(post, 'subtitles_text', ''),
+                    caption=caption,
+                    alt_text=alt,
+                    subtitles=subs,
                 ):
                     return False
             else:
