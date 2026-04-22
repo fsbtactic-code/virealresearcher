@@ -236,7 +236,7 @@ class WebWorkerApi:
             "fetch_images":           gui_data.get("fetch_images", True),
             "fetch_reels":            gui_data.get("fetch_reels", True),
             "fetch_carousels":        gui_data.get("fetch_carousels", True),
-            "max_scrolls":            gui_data.get("max_scrolls", 60),
+            "max_scrolls":            gui_data.get("search_scrolls", 12),
             "min_posts_target":       gui_data.get("min_posts", 10),
             "enable_deep_search":     gui_data.get("deep_search", False),
             "filter_keywords_raw":    gui_data.get("filter_keywords", ""),
