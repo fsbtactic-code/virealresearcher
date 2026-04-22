@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-install_all.py — Universal installer for FilPars.
+install_all.py — Universal installer for Banana Parser.
 
 Works on Windows, macOS, and Linux.
 Installs all Python dependencies + Playwright browsers.
@@ -160,6 +160,14 @@ def verify_imports():
             log_err(f"{name} — {e}")
             all_ok = False
 
+    # Optional: sentence-transformers for AI semantic classification
+    try:
+        import sentence_transformers  # noqa: F401
+        log_ok(f"sentence-transformers {sentence_transformers.__version__} (AI классификатор)")
+    except ImportError:
+        log_warn("sentence-transformers не найден — ИИ-фильтрация будет недоступна")
+        log_warn("Установить: pip install sentence-transformers")
+
     # macOS-specific: check pyobjc
     if sys.platform == "darwin":
         try:
@@ -182,7 +190,7 @@ def create_output_dir():
 def save_project_path():
     """Save absolute path to home directory for global CLI access."""
     try:
-        home_path_file = Path.home() / ".filpars_path"
+        home_path_file = Path.home() / ".banana_parser_path"
         home_path_file.write_text(str(PROJECT_ROOT), encoding="utf-8")
         log_ok(f"Путь к проекту зафиксирован: {home_path_file}")
     except Exception as e:
@@ -192,7 +200,7 @@ def save_project_path():
 def main():
     print()
     print(f"{BOLD}{'='*56}{RESET}")
-    print(f"{BOLD}  FilPars — Installation{RESET}")
+    print(f"{BOLD}  Banana Parser — Installation{RESET}")
     print(f"{DIM}  {platform.system()} {platform.release()} | Python {sys.version.split()[0]}{RESET}")
     print(f"{BOLD}{'='*56}{RESET}")
 
@@ -217,7 +225,7 @@ def main():
     save_project_path()
 
     print(f"\n{'='*56}")
-    print(f"  {GREEN}{BOLD}✓ FilPars успешно установлен!{RESET}")
+    print(f"  {GREEN}{BOLD}✓ Banana Parser успешно установлен!{RESET}")
     print()
     print(f"  {BOLD}Запуск:{RESET}")
     print(f"  {CYAN}1.{RESET} python auth.py          {DIM}← авторизация Instagram (один раз){RESET}")

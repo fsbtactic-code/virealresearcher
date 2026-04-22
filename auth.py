@@ -36,7 +36,7 @@ CUSTOM_CSS = ""  # CSS injection disabled
 def print_banner():
     print()
     print(_c("95", "  ╔══════════════════════════════════════════════════════════════╗"))
-    print(_c("95", "  ║") + BOLD("🟦  FilPars — Instagram Stealth Scraper              ") + _c("95", "║"))
+    print(_c("95", "  ║") + BOLD("🟦  Banana Parser — Instagram Stealth Scraper              ") + _c("95", "║"))
     print(_c("95", "  ║") + "                                                              " + _c("95", "║"))
     print(_c("95", "  ║") + "  " + CYAN("Авторизация Instagram") + "                                       " + _c("95", "║"))
     print(_c("95", "  ╚══════════════════════════════════════════════════════════════╝"))
@@ -44,7 +44,7 @@ def print_banner():
 
 
 def print_warning():
-    print(_c("41;97", "  ⚠️  ВНИМАНИЕ — ПРОЧИТАЙТЕ ПЕРЕД ВХОДОМ  ⚠️                     "))
+    print(_c("41;97", "  [ WARN ]  ВНИМАНИЕ — ПРОЧИТАЙТЕ ПЕРЕД ВХОДОМ  [ WARN ]                     "))
     print()
     print(YELLOW("  ┌──────────────────────────────────────────────────────────┐"))
     print(YELLOW("  │") + RED("  🚫 НЕ используйте свой ОСНОВНОЙ аккаунт Instagram!     ") + YELLOW("│"))
@@ -52,10 +52,10 @@ def print_warning():
     print(YELLOW("  │") + "  Instagram может временно ограничить аккаунт, который    " + YELLOW("│"))
     print(YELLOW("  │") + "  используется для автоматического сбора данных.           " + YELLOW("│"))
     print(YELLOW("  │                                                          │"))
-    print(YELLOW("  │") + GREEN("  ✅ Создайте ОТДЕЛЬНЫЙ аккаунт для парсинга              ") + YELLOW("│"))
-    print(YELLOW("  │") + GREEN("  ✅ Подождите 2-3 дня после создания перед парсингом     ") + YELLOW("│"))
-    print(YELLOW("  │") + GREEN("  ✅ Подпишитесь на 10-20 аккаунтов для правдоподобности  ") + YELLOW("│"))
-    print(YELLOW("  │") + GREEN("  ✅ Не запускайте парсинг чаще 2 раз в сутки             ") + YELLOW("│"))
+    print(YELLOW("  │") + GREEN("  [ OK ] Создайте ОТДЕЛЬНЫЙ аккаунт для парсинга              ") + YELLOW("│"))
+    print(YELLOW("  │") + GREEN("  [ OK ] Подождите 2-3 дня после создания перед парсингом     ") + YELLOW("│"))
+    print(YELLOW("  │") + GREEN("  [ OK ] Подпишитесь на 10-20 аккаунтов для правдоподобности  ") + YELLOW("│"))
+    print(YELLOW("  │") + GREEN("  [ OK ] Не запускайте парсинг чаще 2 раз в сутки             ") + YELLOW("│"))
     print(YELLOW("  │                                                          │"))
     print(YELLOW("  │") + DIM("  Мы заботимся о вашей безопасности 🔒                    ") + YELLOW("│"))
     print(YELLOW("  └──────────────────────────────────────────────────────────┘"))
@@ -95,11 +95,11 @@ async def run_auth():
     try:
         from playwright.async_api import async_playwright
     except ImportError:
-        print(RED("  ❌ Playwright не установлен!"))
+        print(RED("  [ ERROR ] Playwright не установлен!"))
         print("  Запустите: pip install playwright && playwright install chromium")
         return False
 
-    print(CYAN("  🚀 Запускаю браузер..."))
+    print(CYAN("  [ RUN ] Запускаю браузер..."))
     print()
 
     async with async_playwright() as pw:
@@ -134,9 +134,9 @@ async def run_auth():
                 'input[name="username"], a[href="/"][role="link"], button:has-text("Log in"), button:has-text("Войти")',
                 timeout=60000
             )
-            print(GREEN("  ✅ Instagram загружен."))
+            print(GREEN("  [ OK ] Instagram загружен."))
         except Exception as e:
-            print(YELLOW(f"  ⚠️  Медленная загрузка (но продолжаем): {e}"))
+            print(YELLOW(f"  [ WARN ]  Медленная загрузка (но продолжаем): {e}"))
         # Dismiss cookie banner if present
         try:
             cookie_btn = await page.wait_for_selector(
@@ -151,7 +151,7 @@ async def run_auth():
 
         # CSS injection disabled — Instagram native UI used
 
-        print(_c("43;30", "  ⏳ Войдите в Instagram в открытом браузере...                  "))
+        print(_c("43;30", "  [ WAIT ] Войдите в Instagram в открытом браузере...                  "))
         print()
         print(DIM("  Сессия сохранится автоматически когда вы войдёте."))
         print(DIM("  (Или нажмите Enter для ручного сохранения)"))
@@ -193,11 +193,11 @@ async def run_auth():
             print(YELLOW("  ⏱ Тайм-аут 5 минут. Проверяю текущий статус..."))
             current_url = page.url
             if "login" in current_url or "challenge" in current_url:
-                print(YELLOW(f"  ⚠️  URL: {current_url}"))
+                print(YELLOW(f"  [ WARN ]  URL: {current_url}"))
                 retry = input(BOLD("  Всё равно сохранить сессию? (да/нет): ")).strip().lower()
                 if retry not in ("да", "yes", "y", "д"):
                     await browser.close()
-                    print(RED("  ❌ Отменено."))
+                    print(RED("  [ ERROR ] Отменено."))
                     return False
 
         # Save session state
@@ -212,17 +212,17 @@ async def run_auth():
     origins_count = len(storage.get("origins", []))
 
     print()
-    print(_c("42;97", "  ✅ Сессия сохранена!                                           "))
+    print(_c("42;97", "  [ OK ] Сессия сохранена!                                           "))
     print()
     print(f"  📁 Файл:    {GREEN(str(STORAGE_STATE))}")
     print(f"  🍪 Cookies: {BOLD(str(cookies_count))}")
     print(f"  🌐 Origins: {BOLD(str(origins_count))}")
     print()
-    print(CYAN("  🎯 Теперь можно запускать парсинг:"))
+    print(CYAN("  [ TARGET ] Теперь можно запускать парсинг:"))
     print(f"     {DIM('python run_scraper.py')}")
     print()
     print(_c("95", "  ──────────────────────────────────────────────────────────────"))
-    print(f"  🟦 FilPars — t.me/banana_marketing")
+    print("  🟦 Banana Parser — t.me/banana_marketing")
     print(_c("95", "  ──────────────────────────────────────────────────────────────"))
     print()
 
@@ -236,5 +236,5 @@ if __name__ == "__main__":
         sys.exit(0 if result else 1)
     except KeyboardInterrupt:
         print()
-        print(RED("  ❌ Прервано пользователем."))
+        print(RED("  [ ERROR ] Прервано пользователем."))
         sys.exit(1)

@@ -28,7 +28,7 @@
           <polygon points="0 0, 10 3.5, 0 7" class="arrow-head" />
         </marker>
     </defs>
-    <text x="400" y="50" class="title">FilPars: Базовая Архитектура</text>
+    <text x="400" y="50" class="title">Banana Parser: Базовая Архитектура</text>
     <rect x="300" y="100" width="200" height="70" fill="url(#gBlue)" class="rect-box" />
     <text x="400.0" y="133.0" class="box-text">1. UI (web_launcher.py)</text>
     <text x="400.0" y="153.0" class="sub-text">Графический интерфейс</text>

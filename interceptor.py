@@ -14,47 +14,6 @@ from dataclasses import dataclass, field
 from typing import Any, Optional
 
 log = logging.getLogger(__name__)
-AI_KEYWORDS = [k.strip().lower() for k in (
-    "ChatGPT, GPT, OpenAI, Claude, Opus, Sonnet, Haiku, Anthropic, Gemini, DeepMind, DeepSeek, "
-    "Midjourney, Copilot, Cursor, Perplexity, Grok, Mistral, Mixtral, Llama, Sora, DALL-E, "
-    "Stable Diffusion, Flux, Runway, Kling, Pika, Luma, HeyGen, ElevenLabs, Synthesia, Suno, "
-    "Udio, Devin, Windsurf, Bolt, Lovable, Ollama, Qwen, LangChain, AutoGPT, ComfyUI, Replicate, "
-    "Hugging Face, AI, LLM, AGI, нейросеть, ИИ, "
-    "ai-generated, ai generated, made with ai, built with ai, powered by ai, "
-    "ai tool, ai tools, ai art, ai video, ai voice, ai music, ai coding, "
-    "ai automation, ai workflow, ai agent, ai startup, "
-    "vibe coding, vibe-coding, "
-    "prompt, prompting, prompts, "
-    "text to image, text to video, no-code ai, ai wrapper, "
-    "neural network, deep learning, machine learning, "
-    "fine-tuning, fine tuning, generative ai, artificial intelligence, "
-    "ai revolution, ai hype, replaced by ai, ai will replace, future of ai, "
-    "trained the model, ai-powered, ai powered, use ai, using ai, "
-    "asked chatgpt, chatgpt said, gpt wrote, "
-    "ai написал, нейросеть написала, нейросеть сгенерировала, сделано нейросетью, "
-    "генерация, промпт, промпты, "
-    "Diffusion, transformer, embeddings, tokens, inference, multimodal, "
-    "deepfake, neural, generative, "
-    "a.i., искусственный интеллект, нейросети, нейронка, нейронки, "
-    "large language model, большая языковая модель, genai"
-).split(", ")]
-
-def text_has_ai_topics(text: str) -> bool:
-    if not text:
-        return False
-    text_lower = text.lower()
-    text_words = set(re.findall(r'[\w]+', text_lower))
-    for k in AI_KEYWORDS:
-        if k in text_words:
-            return True
-        elif len(k) > 4 and k in text_lower:
-            return True
-        elif ' ' in k and k in text_lower:
-            return True
-        elif k == 'a.i.' and 'a.i.' in text_lower:
-            return True
-    return False
-
 
 @dataclass
 class PostFilter:
@@ -69,9 +28,12 @@ class PostFilter:
     min_followers: int = 0
     max_age_hours: Optional[int] = None
     exclude_zero_engagement: bool = False  # skip posts with 0 likes AND 0 comments
-    only_ai_topics: bool = False
+    filter_keywords: list[str] = field(default_factory=list)
     only_ru_en: bool = False
-    ai_context_detection: bool = False
+    # AI semantic classifier fields (optional, requires sentence-transformers)
+    ai_topic_text: str = ""      # free-text topic description for semantic matching
+    ai_enabled: bool = False     # toggle: True = use AI when keyword match fails
+    ai_threshold: float = 0.35   # cosine similarity threshold (0.0–1.0)
 
     def matches(self, post: "PostData") -> bool:
         """Return True if the post passes all filter criteria."""
@@ -133,8 +95,7 @@ class PostFilter:
                     subtitles=subs,
                 ):
                     return False
-            else:
-                return False
+                # ─────────────────────────────────────────────────────────
 
         # Advanced Language detection filter (RU/EN precision)
         if self.only_ru_en and getattr(post, 'caption_text', ''):

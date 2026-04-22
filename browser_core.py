@@ -292,7 +292,7 @@ class StealthBrowser:
          3. Wait for user input in terminal
          4. Persist new session
         """
-        log.warning("⚠️  CHALLENGE DETECTED — entering recovery mode")
+        log.warning("[ WARN ]  CHALLENGE DETECTED — entering recovery mode")
 
         # 1. Emergency save
         import json
@@ -315,7 +315,7 @@ class StealthBrowser:
 
         # 5. Save refreshed session
         await self.context.storage_state(path=str(STORAGE_PATH))
-        log.info("✅ Session refreshed after captcha solve.")
+        log.info("[ OK ] Session refreshed after captcha solve.")
 
         # 6. Close headed and return to headless
         await self.close()

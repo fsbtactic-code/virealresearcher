@@ -91,7 +91,7 @@ class LaunchGuiParams(BaseModel):
 
 # ── MCP Server ─────────────────────────────────────────
 
-app = Server("filpars")
+app = Server("Banana Parser")
 
 
 @app.list_tools()
@@ -132,7 +132,7 @@ async def list_tools() -> list[Tool]:
         Tool(
             name="master_viral_hunter",
             description=(
-                "🎯 МАСТЕР-СКИЛЛ: Расширяет ключевое слово через автодополнение, "
+                "[ TARGET ] МАСТЕР-СКИЛЛ: Расширяет ключевое слово через автодополнение, "
                 "затем парсит Ленту, Интересное и до 5 хештегов. Ранжирует по "
                 "Индексу Виральности и генерирует HTML-отчёт с CSV/Google Sheets экспортом. "
                 "Поддерживает все фильтры: мин/макс лайков, исключение миллионников, "
@@ -143,7 +143,7 @@ async def list_tools() -> list[Tool]:
         Tool(
             name="launch_gui",
             description=(
-                "🖥️ Запускает главное окно FilPars с графическим интерфейсом. "
+                "[ GUI ] Запускает главное окно Banana Parser с графическим интерфейсом. "
                 "Открывает нативное десктопное окно где пользователь может настроить "
                 "параметры парсинга, запустить сбор и увидеть дашборд с результатами. "
                 "Вызывается без параметров."
@@ -153,7 +153,7 @@ async def list_tools() -> list[Tool]:
         Tool(
             name="launch_auth_window",
             description=(
-                "🔑 Открывает окно авторизации Instagram Playwright для ручного входа. "
+                "[ AUTH ] Открывает окно авторизации Instagram Playwright для ручного входа. "
                 "Использовать, если storage_state.json отсутствует или сессия истекла."
             ),
             inputSchema=LaunchGuiParams.model_json_schema(),
@@ -247,7 +247,7 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
 
             return [TextContent(
                 type="text",
-                text="Графическое окно FilPars успешно запущено в отдельном процессе.",
+                text="Графическое окно Banana Parser успешно запущено в отдельном процессе.",
             )]
             
         elif name == "launch_auth_window":
@@ -283,7 +283,7 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
 
 
 async def main() -> None:
-    log.info("Starting FilPars MCP server...")
+    log.info("Starting Banana Parser MCP server...")
     async with stdio_server() as (read_stream, write_stream):
         await app.run(read_stream, write_stream, app.create_initialization_options())
 
