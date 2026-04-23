@@ -63,13 +63,13 @@ class PostFilter:
         if self.min_followers > 0 and post.owner_followers < self.min_followers:
             return False
             
-        # AI filter: strict keyword match + optional smart context detection
-        if self.only_ai_topics:
+        # Keyword / AI filter
+        if self.filter_keywords:
             caption = post.caption_text or ""
             alt = getattr(post, 'alt_text', '') or ""
             subs = getattr(post, 'subtitles_text', '') or ""
             subs_uri = getattr(post, 'subtitles_uri', '') or ""
-            all_text = caption + alt + subs
+            all_text = (caption + " " + alt + " " + subs).lower()
 
             # Strip emojis, punctuation, urls — count only real words
             meaningful = re.sub(r'#\w+|@\w+|https?://\S+|[^\w\sа-яА-ЯёЁa-zA-Z]', '', all_text).strip()
@@ -77,25 +77,31 @@ class PostFilter:
             if not meaningful:
                 # No text signal at all.
                 # If there's a subtitles_uri we can fetch later → defer (pending).
-                # If it's a Reel/video with no subs URI (common in feed/explore) → pass through:
-                #   Instagram already filtered these posts to the user's feed, so they're likely on-topic.
                 if subs_uri:
                     return None  # add_post() will queue for subtitle fetch
                 elif post.is_reel or getattr(post, 'post_type', '') in ('reel', 'video'):
-                    pass  # Reel with no text and no subtitles URI → pass through
+                    pass  # Reel without text → pass through (Instagram already filtered feed)
                 else:
                     return None  # non-video with no text → defer/discard
-            elif text_has_ai_topics(all_text):
-                pass  # keyword match in caption OR alt OR subtitles
-            elif self.ai_context_detection:
-                from ai_detector import is_ai_content
-                if not is_ai_content(
-                    caption=caption,
-                    alt_text=alt,
-                    subtitles=subs,
-                ):
-                    return False
-                # ─────────────────────────────────────────────────────────
+            else:
+                # Check if any keyword matches
+                kw_match = any(kw.lower() in all_text for kw in self.filter_keywords if kw.strip())
+
+                if not kw_match:
+                    # Try AI semantic classifier as fallback
+                    if self.ai_enabled and self.ai_topic_text:
+                        try:
+                            from ai_classifier import classifier as _clf
+                            if _clf and _clf.is_ready():
+                                score = _clf.score(meaningful)
+                                if score < self.ai_threshold:
+                                    return False
+                            else:
+                                return False  # AI enabled but not ready → strict
+                        except Exception:
+                            return False
+                    else:
+                        return False  # No keyword match, AI disabled → reject
 
         # Advanced Language detection filter (RU/EN precision)
         if self.only_ru_en and getattr(post, 'caption_text', ''):
